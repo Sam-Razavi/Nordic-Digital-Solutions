@@ -59,18 +59,12 @@ def create_ssl_context() -> ssl.SSLContext:
 
 async def initiate_bankid_auth(personal_number: str | None = None) -> dict:
     if settings.bankid_mock_mode:
-        mock_data = {
+        return {
             "orderRef": "mock-order-ref-12345",
             "autoStartToken": "mock-autostart-token",
             "qrStartToken": "mock-qr-start-token",
-            "qrStartSecret": "6162636465666768696a6b6c6d6e6f70",
+            "qrStartSecret": "mock-qr-start-secret",
         }
-        _store_qr_session(
-            mock_data["orderRef"],
-            mock_data["qrStartToken"],
-            mock_data["qrStartSecret"],
-        )
-        return mock_data
 
     url = f"{settings.bankid_base_url}/rp/v6.0/auth"
 
@@ -112,10 +106,6 @@ async def initiate_bankid_auth(personal_number: str | None = None) -> dict:
 
 async def collect_bankid_status(order_ref: str) -> dict:
     if settings.bankid_mock_mode:
-        session = _qr_sessions.get(order_ref)
-        elapsed = int(time.monotonic() - session["started_at"]) if session else 99
-        if elapsed < 5:
-            return {"status": "pending", "hintCode": "outstandingTransaction", "orderRef": order_ref}
         return {
             "status": "complete",
             "hintCode": None,
