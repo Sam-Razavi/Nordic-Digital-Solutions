@@ -517,10 +517,7 @@ function _hideBankIdQr() {
 function _onBankIdComplete(accessToken) {
    _stopBankId();
    _hideBankIdQr();
-   if (accessToken) {
-      sessionStorage.setItem("auth_token", accessToken);
-      sessionStorage.setItem("has_subscription", "true");
-   }
+   if (accessToken) sessionStorage.setItem("auth_token", accessToken);
    if (_bankidInMemberModal) {
       setStatus(document.getElementById("memberBankidStatus"), "");
       document.getElementById("memberBankidBtn").disabled = false;
