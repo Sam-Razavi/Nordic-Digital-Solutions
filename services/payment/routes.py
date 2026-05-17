@@ -1,10 +1,16 @@
 # Ansvarig: Nina Bentmosse
 # Modul: Betaltjänst
 
+import os
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from services.payment.service import PaymentService
+
+# Mappar logiska plan-ID till Stripe price-ID
+_STRIPE_PRICE_MAP: dict[str, str] = {
+    "plan_basic": os.getenv("STRIPE_PRICE_ID", "price_1TRqWVHYkj0fomnSAd10SVLn"),
+}
 
 router = APIRouter(prefix="/payment", tags=["payment"])
 
@@ -27,10 +33,11 @@ def payment_create(body: CreateSubscriptionRequest):
     """Skapa en prenumeration och returnera Stripe-checkout-URL."""
     try:
         if body.method == "card":
+            stripe_price_id = _STRIPE_PRICE_MAP.get(body.plan_id, body.plan_id)
             record = payment_service.create_checkout_session(
-                price_id=body.plan_id,
-                success_url="http://localhost:8000/payment/lyckades",
-                cancel_url="http://localhost:8000/payment/avbruten",
+                price_id=stripe_price_id,
+                success_url="http://localhost:8000/?payment=success",
+                cancel_url="http://localhost:8000/?payment=cancelled",
             )
         else:
             record = payment_service.create_subscription(body.user_id, body.plan_id, method=body.method)
