@@ -4,6 +4,7 @@ __pycache__/
 .env
 venv/
 .venv/
+.runtime_deps/
 
 # OS
 .DS_Store
@@ -21,3 +22,8 @@ client_secret*.json
 .coverage
 htmlcov/
 coverage/
+server.log
+server.err
+
+# Claude Code
+.claude/

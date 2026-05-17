@@ -13,9 +13,11 @@ from services.notification.providers import (
 from services.notification.config import (
     COOLDOWN_SMS_SECONDS,
     COOLDOWN_EMAIL_SECONDS,
+    EMAIL_MOCK_MODE,
     NOTIFICATION_MOCK_MODE,
     SEND_WELCOME_NOTIFICATIONS,
     SITE_PAGE_BASE_URL,
+    SMS_MOCK_MODE,
 )
 from services.notification import db
 from services.notification import messages

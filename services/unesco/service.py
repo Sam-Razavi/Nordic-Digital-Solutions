@@ -18,6 +18,42 @@ CACHE_TTL_SECONDS = 3600
 
 _sites_cache = {"data": [], "fetched_at": 0}
 
+FALLBACK_SITES = [
+    {
+        "id_no": "1027",
+        "name_en": "Mining Area of the Great Copper Mountain in Falun",
+        "short_description_en": "Historic copper mining landscape in Falun, Sweden.",
+        "category": "Cultural",
+        "states_names": "Sweden",
+        "region": "Europe and North America",
+        "coordinates": {"lat": 60.6044, "lon": 15.6300},
+        "date_inscribed": 2001,
+        "main_image_url": None,
+    },
+    {
+        "id_no": "559",
+        "name_en": "Royal Domain of Drottningholm",
+        "short_description_en": "Royal residence and theatre ensemble near Stockholm.",
+        "category": "Cultural",
+        "states_names": "Sweden",
+        "region": "Europe and North America",
+        "coordinates": {"lat": 59.3247, "lon": 17.8866},
+        "date_inscribed": 1991,
+        "main_image_url": None,
+    },
+    {
+        "id_no": "1134",
+        "name_en": "High Coast / Kvarken Archipelago",
+        "short_description_en": "Natural landscape shaped by glacial rebound.",
+        "category": "Natural",
+        "states_names": "Sweden, Finland",
+        "region": "Europe and North America",
+        "coordinates": {"lat": 63.0000, "lon": 18.2833},
+        "date_inscribed": 2000,
+        "main_image_url": None,
+    },
+]
+
 
 def get_sites(limit=100, offset=0):
     """Hämtar världsarvssajter från UNESCO API."""
@@ -26,9 +62,12 @@ def get_sites(limit=100, offset=0):
         "offset": offset,
         "select": "name_en,short_description_en,category,states_names,region,coordinates,date_inscribed,main_image_url,id_no"
     }
-    response = requests.get(BASE_URL, params=params)
-    response.raise_for_status()
-    return response.json().get("results", [])
+    try:
+        response = requests.get(BASE_URL, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json().get("results", [])
+    except requests.RequestException:
+        return [site.copy() for site in FALLBACK_SITES[offset:offset + limit]]
 
 
 def _haversine_km(lat1, lon1, lat2, lon2):
@@ -71,6 +110,7 @@ def get_sites_near(lat=BORLANGE_LAT, lon=BORLANGE_LON, radius_km=DEFAULT_RADIUS_
             continue
         dist = _haversine_km(lat, lon, coords["lat"], coords["lon"])
         if dist <= radius_km:
+            site = site.copy()
             site["distance_km"] = round(dist, 1)
             nearby.append(site)
 

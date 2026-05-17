@@ -68,12 +68,13 @@ function escapeHtml(value) {
 }
 
 async function apiFetch(path, options = {}) {
+   const { headers = {}, ...restOptions } = options;
    const token = sessionStorage.getItem("auth_token");
    const response = await fetch(`${API_BASE}${path}`, {
       headers: {
          "Content-Type": "application/json",
          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-         ...(options.headers || {}),
+         ...headers,
       },
       ...restOptions,
    });
@@ -334,6 +335,23 @@ async function showLoggedIn(isBankId = false) {
       document.getElementById("twoFaPanel").hidden = false;
       load2faStatus();
    }
+}
+
+function showChatIfLoggedIn() {
+   const token = sessionStorage.getItem("auth_token");
+
+   if (token) {
+      showLoggedIn(_isBankIdUser);
+      return;
+   }
+
+   loginForm.hidden = false;
+   twoFactorForm.hidden = true;
+   document.getElementById("memberBankidSection").hidden = false;
+   document.getElementById("memberSiteCard").hidden = true;
+   document.getElementById("userInfoPanel").hidden = true;
+   document.getElementById("chatbotContainer").hidden = true;
+   document.getElementById("twoFaPanel").hidden = true;
 }
 
 function logout() {

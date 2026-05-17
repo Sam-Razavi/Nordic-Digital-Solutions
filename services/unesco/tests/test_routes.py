@@ -9,6 +9,7 @@ from services.unesco.routes import router
 _app = FastAPI()
 _app.include_router(router)
 client = TestClient(_app)
+AUTH_HEADERS = {"Authorization": "Bearer test-token"}
 
 
 def test_sites_endpoint_returns_200():
@@ -53,6 +54,7 @@ def test_chat_endpoint_returns_200(mocker):
     )
     response = client.post(
         "/unesco/chat",
+        headers=AUTH_HEADERS,
         json={"message": "Berätta om Gammelstaden"},
     )
     assert response.status_code == 200
@@ -65,6 +67,7 @@ def test_chat_endpoint_returns_answer_field(mocker):
     )
     response = client.post(
         "/unesco/chat",
+        headers=AUTH_HEADERS,
         json={"message": "Berätta om Gammelstaden"},
     )
     data = response.json()
@@ -79,6 +82,7 @@ def test_chat_endpoint_with_custom_position(mocker):
     )
     response = client.post(
         "/unesco/chat",
+        headers=AUTH_HEADERS,
         json={"message": "Vad finns nära mig?", "lat": 59.3293, "lon": 18.0686, "radius": 100},
     )
     assert response.status_code == 200
@@ -92,6 +96,7 @@ def test_chat_refuses_off_topic(mocker):
     )
     response = client.post(
         "/unesco/chat",
+        headers=AUTH_HEADERS,
         json={"message": "Vem är USA:s president?"},
     )
     assert response.status_code == 200
