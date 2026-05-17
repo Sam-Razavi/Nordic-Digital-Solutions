@@ -28,7 +28,6 @@ const detailDescription = document.getElementById("detailDescription");
 const languageSelect = document.getElementById("languageSelect");
 const memberSiteText = document.getElementById("memberSiteText");
 const visitedCheck = document.getElementById("visitedCheck");
-const cancelSubscriptionBtn = document.getElementById("cancelSubscriptionBtn");
 
 let lastFocusedElement;
 let currentPosition = { ...DEFAULT_POSITION };
@@ -68,12 +67,13 @@ function escapeHtml(value) {
 }
 
 async function apiFetch(path, options = {}) {
+   const { headers: extraHeaders, ...restOptions } = options;
    const token = sessionStorage.getItem("auth_token");
    const response = await fetch(`${API_BASE}${path}`, {
       headers: {
          "Content-Type": "application/json",
          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-         ...(options.headers || {}),
+         ...(extraHeaders || {}),
       },
       ...restOptions,
    });
@@ -225,9 +225,27 @@ function selectSite(site) {
    translateSelectedSite();
 }
 
+async function loadLanguages() {
+   try {
+      const languages = await apiFetch("/translation/languages");
+      const select = document.getElementById("languageSelect");
+      select.innerHTML = '<option value="">Original (engelska)</option>';
+      languages.forEach(lang => {
+         const option = document.createElement("option");
+         option.value = lang.code;
+         option.textContent = lang.name || lang.code;
+         if (lang.code === "sv") option.selected = true;
+         select.appendChild(option);
+      });
+   } catch {
+      // om languages-anropet misslyckas behåller vi original-alternativet
+   }
+}
+
 async function loadWidgetData() {
    setStatus(widgetStatus, "Hämtar din position...");
    currentPosition = await getPosition();
+   await loadLanguages();
 
    setStatus(widgetStatus, "Hämtar världsarv från backend...");
    sites = await apiFetch(
@@ -313,16 +331,24 @@ async function sendChatMessage() {
 let _isBankIdUser = false;
 let _bankidInMemberModal = false;
 
+function activatePremium(isBankId = false) {
+   document.getElementById("memberSiteCard").hidden = false;
+   document.getElementById("memberMapHeader").textContent = "Din Premium-karta";
+   document.getElementById("chatbotContainer").hidden = false;
+   document.getElementById("accountManagement").hidden = false;
+   if (!isBankId) {
+      document.getElementById("twoFaPanel").hidden = false;
+      load2faStatus();
+   }
+}
+
 async function showLoggedIn(isBankId = false) {
    _isBankIdUser = isBankId;
    loginForm.hidden = true;
    twoFactorForm.hidden = true;
    setStatus(loginStatus, "");
    document.getElementById("memberBankidSection").hidden = true;
-   document.getElementById("memberSiteCard").hidden = false;
-   document.getElementById("memberMapHeader").textContent = "Din Premium-karta";
    document.getElementById("userInfoPanel").hidden = false;
-   document.getElementById("chatbotContainer").hidden = false;
 
    try {
       const user = await apiFetch("/auth/me");
@@ -330,14 +356,36 @@ async function showLoggedIn(isBankId = false) {
       document.getElementById("userEmailDisplay").textContent = user.full_name ? user.email : "";
    } catch { /* token may not be set yet, ignore */ }
 
-   if (!isBankId) {
-      document.getElementById("twoFaPanel").hidden = false;
-      load2faStatus();
+   if (sessionStorage.getItem("has_subscription") === "true") {
+      activatePremium(isBankId);
+   }
+}
+
+async function showChatIfLoggedIn() {
+   const token = sessionStorage.getItem("auth_token");
+   if (!token) return;
+
+   try {
+      const user = await apiFetch("/auth/me");
+      document.getElementById("userInfoPanel").hidden = false;
+      document.getElementById("userNameDisplay").textContent = user.full_name || user.email;
+      document.getElementById("userEmailDisplay").textContent = user.full_name ? user.email : "";
+      loginForm.hidden = true;
+      document.getElementById("memberBankidSection").hidden = true;
+
+      if (sessionStorage.getItem("has_subscription") === "true") {
+         activatePremium();
+         if (sites.length) renderMap("member-map-view", "member");
+      }
+   } catch {
+      sessionStorage.removeItem("auth_token");
+      sessionStorage.removeItem("user_email");
    }
 }
 
 function logout() {
    sessionStorage.removeItem("auth_token");
+   sessionStorage.removeItem("has_subscription");
    _isBankIdUser = false;
    _bankidInMemberModal = false;
    document.getElementById("userInfoPanel").hidden = true;
@@ -354,6 +402,8 @@ function logout() {
    document.getElementById("memberBankidQrPanel").hidden = true;
    document.getElementById("memberBankidQrCode").innerHTML = "";
    document.getElementById("memberMapHeader").textContent = "Interaktiv karta";
+   document.getElementById("accountManagement").hidden = true;
+   document.getElementById("deleteAccountConfirm").hidden = true;
    loginForm.hidden = false;
    loginForm.reset();
    twoFactorForm.hidden = true;
@@ -731,6 +781,8 @@ async function subscribe(event) {
          return;
       }
 
+      sessionStorage.setItem("has_subscription", "true");
+      sessionStorage.setItem("user_email", email);
       setStatus(widgetStatus, "Konto skapat och prenumeration aktiverad!");
       setTimeout(() => {
          closeModal(visitorModal);
@@ -805,7 +857,11 @@ async function markVisited() {
       });
       setStatus(loginStatus, "Platsen markerades som besökt.");
    } catch (error) {
-      setStatus(loginStatus, error.message, true);
+      if (error.message.includes("Prenumerant finns inte")) {
+         visitedCheck.parentElement.hidden = true;
+      } else {
+         setStatus(loginStatus, error.message, true);
+      }
    }
 }
 
@@ -887,51 +943,29 @@ document.getElementById("sendChat").addEventListener("click", sendChatMessage);
 document.getElementById("chatInput").addEventListener("keydown", (event) => {
    if (event.key === "Enter") sendChatMessage();
 });
-cancelSubscriptionBtn.addEventListener("click", () => {
-   document.getElementById("cancelConfirm").hidden = false;
-});
-
-document.getElementById("confirmCancelNo").addEventListener("click", () => {
-   document.getElementById("cancelConfirm").hidden = true;
-});
-
-document.getElementById("confirmCancelYes").addEventListener("click", async () => {
-   const token = sessionStorage.getItem("auth_token");
-   if (!token) {
-      setStatus(loginStatus, "Du är inte inloggad.", true);
-      return;
-   }
-   const userEmail = sessionStorage.getItem("user_email");
-   try {
-      setStatus(loginStatus, "Avslutar prenumeration...");
-      document.getElementById("cancelConfirm").hidden = true;
-      if (userEmail) {
-         await apiFetch("/api/notification/unsubscribe", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ user_id: userEmail }),
-         });
-      }
-      await apiFetch("/auth/account", {
-         method: "DELETE",
-         headers: { Authorization: `Bearer ${token}` },
-      });
-      sessionStorage.removeItem("auth_token");
-      sessionStorage.removeItem("user_email");
-      document.getElementById("setPasswordSection").hidden = true;
-      document.getElementById("subscribeForm").hidden = false;
-      document.getElementById("widgetStatus").textContent = "";
-      closeModal(memberModal);
-      openModal(visitorModal);
-   } catch (error) {
-      setStatus(loginStatus, error.message, true);
-   }
-});
 document.getElementById("backToVisitorBtn").addEventListener("click", () => {
    closeModal(memberModal);
    openModal(visitorModal);
 });
 document.getElementById("logoutBtn").addEventListener("click", logout);
+document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+   document.getElementById("deleteAccountConfirm").hidden = false;
+});
+document.getElementById("confirmDeleteNo").addEventListener("click", () => {
+   document.getElementById("deleteAccountConfirm").hidden = true;
+});
+document.getElementById("confirmDeleteYes").addEventListener("click", async () => {
+   try {
+      document.getElementById("deleteAccountConfirm").hidden = true;
+      await apiFetch("/auth/account", { method: "DELETE" });
+      logout();
+      closeModal(memberModal);
+      openModal(visitorModal);
+      setStatus(widgetStatus, "Kontot har raderats.");
+   } catch (error) {
+      setStatus(loginStatus, error.message, true);
+   }
+});
 document.getElementById("twoFaActionBtn").addEventListener("click", handle2faAction);
 document.getElementById("twoFaVerifyBtn").addEventListener("click", verify2faEnable);
 document.getElementById("twoFaDisableVerifyBtn").addEventListener("click", verify2faDisable);
@@ -945,8 +979,12 @@ document.getElementById("memberBankidQrCancelBtn").addEventListener("click", () 
    document.getElementById("memberBankidChoicePanel").style.display = "flex";
 });
 
+let _mousedownOnOverlay = false;
+window.addEventListener("mousedown", (event) => {
+   _mousedownOnOverlay = event.target.classList.contains("modal-overlay");
+});
 window.addEventListener("click", (event) => {
-   if (event.target.classList.contains("modal-overlay")) {
+   if (_mousedownOnOverlay && event.target.classList.contains("modal-overlay")) {
       closeModal(visitorModal);
       closeModal(memberModal);
    }
@@ -958,3 +996,27 @@ document.addEventListener("keydown", (event) => {
       closeModal(memberModal);
    }
 });
+
+// Hantera återkomst från Stripe-betalning
+(async () => {
+   const params = new URLSearchParams(window.location.search);
+   const payment = params.get("payment");
+   if (!payment) return;
+
+   history.replaceState({}, "", "/");
+
+   if (payment === "success") {
+      const token = sessionStorage.getItem("auth_token");
+      if (token) {
+         sessionStorage.setItem("has_subscription", "true");
+         await ensureWidgetLoaded();
+         openModal(memberModal);
+         await showLoggedIn();
+         if (sites.length) renderMap("member-map-view", "member");
+      }
+   } else if (payment === "cancelled") {
+      await ensureWidgetLoaded();
+      openModal(visitorModal);
+      setStatus(widgetStatus, "Betalningen avbröts. Försök igen om du vill.");
+   }
+})();

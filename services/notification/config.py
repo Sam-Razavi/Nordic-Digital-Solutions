@@ -63,8 +63,6 @@ NOTIFICATION_MOCK_MODE = _explicit_mock or not bool(
     HELLOSMS_USERNAME
     and HELLOSMS_PASSWORD
     and SMTP2GO_API_KEY
-    and PG_USER
-    and PG_PASSWORD
 )
 
 _welcome_env = os.getenv("SEND_WELCOME_NOTIFICATIONS", "").lower()

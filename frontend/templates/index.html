@@ -109,11 +109,7 @@
                   <div class="form-group">
                      <label for="languageSelect">Språk</label>
                      <select id="languageSelect">
-                        <option value="sv" selected>Svenska</option>
                         <option value="">Original (engelska)</option>
-                        <option value="en">English</option>
-                        <option value="ja">日本語</option>
-                        <option value="ar">العربية</option>
                      </select>
                   </div>
                   <h4 id="detailTitle"></h4>
@@ -206,17 +202,26 @@
             </div>
 
             <div class="modal-body">
-               <button class="btn-cancel" id="backToVisitorBtn" type="button" style="margin-top:0;margin-bottom:12px;">← Tillbaka</button>
-
                <div id="userInfoPanel" hidden>
                   <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                      <div>
                         <strong id="userNameDisplay"></strong><br>
                         <small id="userEmailDisplay" style="opacity:0.7;font-size:0.8rem;"></small>
                      </div>
-                     <button class="btn-cancel" id="logoutBtn" type="button" style="width:auto;margin:0;padding:8px 16px;">Logga ut</button>
+                     <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                        <button class="btn-cancel" id="logoutBtn" type="button" style="width:auto;margin:0;padding:8px 16px;">Logga ut</button>
+                        <button class="btn-cancel" id="deleteAccountBtn" type="button" style="width:auto;margin:0;padding:6px 12px;font-size:0.8rem;color:#dc3545;border-color:#dc3545;">Avsluta prenumeration och radera konto</button>
+                     </div>
+                  </div>
+                  <div id="deleteAccountConfirm" hidden style="margin-top:8px;padding:14px;background:#fff3f3;border:1px solid #f5c6cb;border-radius:8px;">
+                     <p style="margin:0 0 10px;font-size:0.9rem;">Är du säker? Din prenumeration avslutas och kontot raderas permanent.</p>
+                     <div style="display:flex;gap:10px;">
+                        <button class="btn-primary" id="confirmDeleteYes" type="button" style="background:#dc3545;">Ja, radera</button>
+                        <button class="btn-primary" id="confirmDeleteNo" type="button" style="background:#6c757d;">Avbryt</button>
+                     </div>
                   </div>
                </div>
+
 
                <form class="login-form" id="loginForm">
                   <h4>Logga in</h4>
@@ -314,16 +319,7 @@
                   </div>
                </div>
 
-               <div class="account-management" id="accountManagement" hidden>
-                  <button class="btn-cancel" id="cancelSubscriptionBtn" type="button">Avsluta prenumeration</button>
-                  <div id="cancelConfirm" hidden style="margin-top:12px;padding:14px;background:#fff3f3;border:1px solid #f5c6cb;border-radius:8px;">
-                     <p style="margin:0 0 10px;font-size:0.9rem;">Är du säker på att du vill avsluta din prenumeration?</p>
-                     <div style="display:flex;gap:10px;">
-                        <button class="btn-primary" id="confirmCancelYes" type="button" style="background:#dc3545;">Ja, avsluta</button>
-                        <button class="btn-primary" id="confirmCancelNo" type="button" style="background:#6c757d;">Nej, behåll</button>
-                     </div>
-                  </div>
-               </div>
+               <div class="account-management" id="accountManagement" hidden></div>
             </div>
          </div>
       </div>

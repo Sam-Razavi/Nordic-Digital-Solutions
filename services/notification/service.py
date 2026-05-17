@@ -14,6 +14,8 @@ from services.notification.config import (
     COOLDOWN_SMS_SECONDS,
     COOLDOWN_EMAIL_SECONDS,
     NOTIFICATION_MOCK_MODE,
+    SMS_MOCK_MODE,
+    EMAIL_MOCK_MODE,
     SEND_WELCOME_NOTIFICATIONS,
     SITE_PAGE_BASE_URL,
 )
@@ -131,6 +133,19 @@ def subscribe(user_id, phone=None, email=None, sites=None):
         )
 
     return {"success": True, "subscriber": sub}
+
+
+def send_account_deleted_email(email: str):
+    """Skickar bekräftelsemail vid kontoradering — INGEN SMS."""
+    if not email or EMAIL_MOCK_MODE:
+        logger.info("Raderingsmail hoppades över för %s (mock-läge eller ingen e-post)", email)
+        return
+    email_provider.send(
+        to=email,
+        subject=messages.account_deleted_email_subject(),
+        message=messages.account_deleted_email_body(),
+    )
+    logger.info("Raderingsbekräftelse skickad till %s", email)
 
 
 def send_welcome(email=None, phone=None, sites=None):

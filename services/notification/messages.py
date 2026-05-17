@@ -19,11 +19,12 @@ def _gdpr_notice():
 
 # --- Välkomstmeddelande (vid /subscribe) ---
 
+
 def welcome_sms():
     return (
         "Tack för att du registrerat dig! Vi hör av oss när du är nära "
         "ett UNESCO-världsarv, så du inte missar en plats värd att "
-        "upptäcka. Svara STOP för att avsluta."
+        "upptäcka."
     )
 
 
@@ -53,6 +54,7 @@ def welcome_email_body(sites=None):
 
 # --- Platsbaserad notifikation (vid trigger) ---
 
+
 def location_sms(site_name, link=None):
     msg = f"Du är nära {site_name} - ett av UNESCO:s världsarv. Ta chansen att upptäcka det."
     if link:
@@ -77,7 +79,27 @@ def location_email_body(site_name, link=None):
     return text
 
 
+# --- Bekräftelse vid kontoradering ---
+
+
+def account_deleted_email_subject():
+    return "Ditt konto har raderats"
+
+
+def account_deleted_email_body():
+    return (
+        "Hej!\n\n"
+        "Vi bekräftar att ditt konto hos UNESCO World Heritage Service har raderats.\n\n"
+        "All din personliga information, inklusive e-postadress, prenumerationer "
+        "och besökshistorik, har tagits bort permanent från våra system.\n\n"
+        "Om du vill använda tjänsten igen är du alltid välkommen att skapa ett nytt konto.\n\n"
+        "Tack för att du använde tjänsten!\n"
+        "UNESCO World Heritage Service"
+    )
+
+
 # --- Bekräftelse vid avprenumeration ---
+
 
 def unsubscribe_sms(sites=None):
     if sites:
