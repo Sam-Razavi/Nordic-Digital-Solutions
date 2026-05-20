@@ -4,9 +4,12 @@ from dotenv import load_dotenv
 # Detta behövs eftersom vissa moduler, t.ex. notification, kräver miljövariabler direkt vid import.
 load_dotenv()
 
+import logging
 import os
 
 from fastapi import FastAPI
+
+from core.config import settings
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -29,6 +32,40 @@ from services.payment.routes import router as payment_router
 
 # Skapar huvudappen för hela backend.
 # Alla moduler kopplas in här, men själva logiken ska ligga i respektive modul.
+_logger = logging.getLogger("nordic.bankid")
+
+
+def _validate_bankid_config() -> None:
+    if settings.bankid_mock_mode:
+        _logger.warning(
+            "BankID running in MOCK mode (BANKID_MOCK_MODE=true). "
+            "No real BankID app will be contacted; logins auto-complete."
+        )
+        return
+
+    missing = []
+    if not settings.bankid_cert_file or not os.path.exists(settings.bankid_cert_file):
+        missing.append(f"BANKID_CERT_FILE ({settings.bankid_cert_file!r})")
+    if not settings.bankid_ca_file or not os.path.exists(settings.bankid_ca_file):
+        missing.append(f"BANKID_CA_FILE ({settings.bankid_ca_file!r})")
+
+    if missing:
+        raise RuntimeError(
+            "BankID är konfigurerat för riktig miljö (BANKID_MOCK_MODE=false) "
+            "men följande filer saknas eller är inte angivna: "
+            + ", ".join(missing)
+            + ". Sätt BANKID_MOCK_MODE=true i .env för demo, eller ange giltiga certifikatfiler."
+        )
+
+    _logger.info(
+        "BankID running in REAL mode against %s (cert=%s)",
+        settings.bankid_base_url,
+        settings.bankid_cert_file,
+    )
+
+
+_validate_bankid_config()
+
 app = FastAPI(title="Nordic Digital Solutions")
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")

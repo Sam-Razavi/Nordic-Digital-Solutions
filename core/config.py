@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
 
-    bankid_mock_mode: bool = True
+    bankid_mock_mode: bool = False
     bankid_base_url: str = "https://appapi2.test.bankid.com"
     bankid_cert_file: str = ""
     bankid_cert_password: str = ""
