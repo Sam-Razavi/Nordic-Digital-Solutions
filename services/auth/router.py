@@ -20,6 +20,7 @@ from services.auth.schemas import (
 )
 from services.notification.service import send_account_deleted_email
 from services.auth.service import (
+    activate_subscription,
     complete_two_factor_login,
     delete_user,
     disable_two_factor,
@@ -104,6 +105,14 @@ def update_me_profile(
     )
 
     return updated_user
+
+
+@router.post("/subscription/activate", response_model=UserResponse)
+def activate_subscription_route(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return activate_subscription(db, current_user)
 
 
 @router.post("/2fa/setup", response_model=TwoFactorSetupResponse)

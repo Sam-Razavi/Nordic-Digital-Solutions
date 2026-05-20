@@ -257,6 +257,13 @@ def complete_two_factor_login(
     }
 
 
+def activate_subscription(db: Session, user: User) -> User:
+    user.has_subscription = True
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 def delete_user(db: Session, user: User) -> None:
     db.delete(user)
     db.commit()

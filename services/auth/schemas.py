@@ -27,6 +27,7 @@ class UserResponse(BaseModel):
     home_lat: float | None = None
     home_lon: float | None = None
     two_factor_enabled: bool = False
+    has_subscription: bool = False
 
     model_config = {
         "from_attributes": True
