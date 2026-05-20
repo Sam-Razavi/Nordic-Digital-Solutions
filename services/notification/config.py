@@ -33,7 +33,7 @@ ADMIN_TOKEN = os.getenv("NOTIFICATION_ADMIN_TOKEN", "")
 # Backend bygger länken som "{SITE_PAGE_BASE_URL}?id={site_id}".
 SITE_PAGE_BASE_URL = os.getenv(
     "SITE_PAGE_BASE_URL",
-    "http://localhost:8000/widget",
+    "https://nds.samincodes.com/widget",
 )
 
 # Anti-spam: cooldown per kanal och världsarv (anges i TIMMAR).
