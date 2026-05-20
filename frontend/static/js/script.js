@@ -340,6 +340,24 @@ function activatePremium(isBankId = false) {
       document.getElementById("twoFaPanel").hidden = false;
       load2faStatus();
    }
+   triggerNearbyNotification();
+}
+
+async function triggerNearbyNotification() {
+   const token = sessionStorage.getItem("auth_token");
+   if (!token || !sites.length) return;
+
+   const nearest = sites[0];
+   const siteId = getSiteId(nearest);
+   const siteName = nearest.name_en || "Okänt världsarv";
+
+   try {
+      await apiFetch(
+         `/api/notification/trigger?user_id=${encodeURIComponent(token)}&site_id=${encodeURIComponent(siteId)}&site_name=${encodeURIComponent(siteName)}`
+      );
+   } catch {
+      // Cooldown, redan besökt, eller saknad prenumeration — tyst ignorera
+   }
 }
 
 async function showLoggedIn(isBankId = false) {
