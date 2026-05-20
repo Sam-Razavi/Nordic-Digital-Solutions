@@ -538,8 +538,10 @@ function _hideBankIdQr() {
 async function _onBankIdComplete(accessToken) {
    _stopBankId();
    _hideBankIdQr();
-   if (accessToken) sessionStorage.setItem("auth_token", accessToken);
-   await syncSubscriptionStatus();
+   if (accessToken) {
+      sessionStorage.setItem("auth_token", accessToken);
+      sessionStorage.setItem("has_subscription", "true");
+   }
    if (_bankidInMemberModal) {
       setStatus(document.getElementById("memberBankidStatus"), "");
       document.getElementById("memberBankidBtn").disabled = false;
