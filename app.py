@@ -50,12 +50,13 @@ def _validate_bankid_config() -> None:
         missing.append(f"BANKID_CA_FILE ({settings.bankid_ca_file!r})")
 
     if missing:
-        raise RuntimeError(
-            "BankID är konfigurerat för riktig miljö (BANKID_MOCK_MODE=false) "
-            "men följande filer saknas eller är inte angivna: "
-            + ", ".join(missing)
-            + ". Sätt BANKID_MOCK_MODE=true i .env för demo, eller ange giltiga certifikatfiler."
+        _logger.error(
+            "BankID is configured for real mode (BANKID_MOCK_MODE=false) but the "
+            "following cert files are missing: %s. BankID logins will fail until "
+            "the cert files are present.",
+            ", ".join(missing),
         )
+        return
 
     _logger.info(
         "BankID running in REAL mode against %s (cert=%s)",
