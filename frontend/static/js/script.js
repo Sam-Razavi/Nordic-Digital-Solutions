@@ -10,6 +10,7 @@ const SEARCH_RADIUS_KM = 150;
 
 const visitorModal = document.getElementById("unescoModal");
 const memberModal = document.getElementById("memberModal");
+const invoiceModal = document.getElementById("invoiceModal");
 const openBtn = document.getElementById("openAdBtn");
 const closeAdBtn = document.getElementById("closeAdBtn");
 const closeMemberBtn = document.getElementById("closeMemberBtn");
@@ -152,14 +153,16 @@ function renderMap(containerId, mapRefName) {
       .addTo(map)
       .bindPopup("Din position");
 
-   sites.forEach((site) => {
-      const coords = getCoordinates(site);
-      if (!coords) return;
-      L.marker([coords.lat, coords.lon])
-         .addTo(map)
-         .bindPopup(site.name_en || "UNESCO World Heritage Site")
-         .on("click", () => selectSite(site));
-   });
+   if (mapRefName !== "visitor") {
+      sites.forEach((site) => {
+         const coords = getCoordinates(site);
+         if (!coords) return;
+         L.marker([coords.lat, coords.lon])
+            .addTo(map)
+            .bindPopup(site.name_en || "UNESCO World Heritage Site")
+            .on("click", () => selectSite(site));
+      });
+   }
 
    setTimeout(() => map.invalidateSize(), 100);
    if (mapRefName === "visitor") visitorMap = map;
@@ -532,10 +535,11 @@ function _hideBankIdQr() {
    _stopBankId();
 }
 
-function _onBankIdComplete(accessToken) {
+async function _onBankIdComplete(accessToken) {
    _stopBankId();
    _hideBankIdQr();
    if (accessToken) sessionStorage.setItem("auth_token", accessToken);
+   await syncSubscriptionStatus();
    if (_bankidInMemberModal) {
       setStatus(document.getElementById("memberBankidStatus"), "");
       document.getElementById("memberBankidBtn").disabled = false;
@@ -799,18 +803,41 @@ async function subscribe(event) {
          return;
       }
 
-      sessionStorage.setItem("has_subscription", "true");
-      sessionStorage.setItem("user_email", email);
-      setStatus(widgetStatus, "Konto skapat och prenumeration aktiverad!");
-      setTimeout(() => {
+      if (method === "invoice") {
+         // Prefyll namn och e-post från registreringsformuläret
+         document.getElementById("invoiceFullName").value = name || "";
+         document.getElementById("invoiceEmail").value = email || "";
          closeModal(visitorModal);
-         openModal(memberModal);
-         showLoggedIn(false);
-         if (sites.length) renderMap("member-map-view", "member");
-      }, 1500);
+         openModal(invoiceModal);
+         return;
+      }
+
+      await _completeSubscription(email);
    } catch (error) {
       setStatus(widgetStatus, error.message, true);
    }
+}
+
+async function _completeSubscription(email) {
+   await apiFetch("/auth/subscription/activate", { method: "POST" });
+   sessionStorage.setItem("has_subscription", "true");
+   if (email) sessionStorage.setItem("user_email", email);
+   closeModal(visitorModal);
+   closeModal(invoiceModal);
+   openModal(memberModal);
+   await showLoggedIn(false);
+   if (sites.length) renderMap("member-map-view", "member");
+}
+
+async function syncSubscriptionStatus() {
+   try {
+      const user = await apiFetch("/auth/me");
+      if (user.has_subscription) {
+         sessionStorage.setItem("has_subscription", "true");
+      } else {
+         sessionStorage.removeItem("has_subscription");
+      }
+   } catch { /* ignorera fel */ }
 }
 
 async function login(event) {
@@ -835,6 +862,7 @@ async function login(event) {
 
       sessionStorage.setItem("auth_token", result.access_token);
       sessionStorage.setItem("user_email", document.getElementById("loginEmail").value.trim());
+      await syncSubscriptionStatus();
       setStatus(loginStatus, "Inloggad.");
       showLoggedIn();
    } catch (error) {
@@ -855,6 +883,7 @@ async function completeTwoFactor(event) {
          }),
       });
       sessionStorage.setItem("auth_token", result.access_token);
+      await syncSubscriptionStatus();
       setStatus(loginStatus, "Inloggad.");
       showLoggedIn();
    } catch (error) {
@@ -954,6 +983,20 @@ document.getElementById("bankidQrCancelBtn").addEventListener("click", () => {
 });
 subscribeForm.addEventListener("submit", subscribe);
 loginForm.addEventListener("submit", login);
+document.getElementById("invoiceForm").addEventListener("submit", async (event) => {
+   event.preventDefault();
+   const btn = document.getElementById("invoiceSubmitBtn");
+   const status = document.getElementById("invoiceStatus");
+   btn.disabled = true;
+   setStatus(status, "Behandlar faktura...");
+   try {
+      const email = document.getElementById("invoiceEmail").value.trim();
+      await _completeSubscription(email);
+   } catch (err) {
+      setStatus(status, err.message, true);
+      btn.disabled = false;
+   }
+});
 twoFactorForm.addEventListener("submit", completeTwoFactor);
 languageSelect.addEventListener("change", translateSelectedSite);
 visitedCheck.addEventListener("change", markVisited);
@@ -1026,6 +1069,7 @@ document.addEventListener("keydown", (event) => {
    if (payment === "success") {
       const token = sessionStorage.getItem("auth_token");
       if (token) {
+         await apiFetch("/auth/subscription/activate", { method: "POST" }).catch(() => {});
          sessionStorage.setItem("has_subscription", "true");
          await ensureWidgetLoaded();
          openModal(memberModal);

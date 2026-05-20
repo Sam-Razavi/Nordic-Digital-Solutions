@@ -90,7 +90,7 @@ def payment_success():
   <div class="icon">✅</div>
   <h1>Betalningen lyckades!</h1>
   <p>Ditt konto är nu uppdaterat.</p>
-  <a href="http://localhost:8000">Tillbaka till tjänsten</a>
+  <a href="/?payment=success">Tillbaka till tjänsten</a>
 </div>
 </body></html>"""
 
