@@ -21,3 +21,10 @@ client_secret*.json
 .coverage
 htmlcov/
 coverage/
+server.log
+server.err
+.runtime_deps/
+run_server.ps1
+
+# Claude Code
+.claude/
