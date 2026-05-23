@@ -6,16 +6,11 @@ import logging
 import re
 from services.notification.providers import (
     EmailProvider,
-    MockEmailProvider,
-    MockSMSProvider,
     SMSProvider,
 )
 from services.notification.config import (
     COOLDOWN_SMS_SECONDS,
     COOLDOWN_EMAIL_SECONDS,
-    NOTIFICATION_MOCK_MODE,
-    SMS_MOCK_MODE,
-    EMAIL_MOCK_MODE,
     SEND_WELCOME_NOTIFICATIONS,
     SITE_PAGE_BASE_URL,
 )
@@ -27,9 +22,8 @@ logger = logging.getLogger("notification")
 # Initiera databasen vid import
 db.init_db()
 
-# Provider-instanser väljs per kanal baserat på tillgängliga credentials
-sms_provider = MockSMSProvider() if (SMS_MOCK_MODE or db.using_mock_storage()) else SMSProvider()
-email_provider = MockEmailProvider() if (EMAIL_MOCK_MODE or db.using_mock_storage()) else EmailProvider()
+sms_provider = SMSProvider()
+email_provider = EmailProvider()
 
 VALID_TYPES = ("sms", "email")
 _PHONE_RE = re.compile(r"^\+?[0-9\s\-]{7,15}$")
@@ -137,8 +131,7 @@ def subscribe(user_id, phone=None, email=None, sites=None):
 
 def send_account_deleted_email(email: str):
     """Skickar bekräftelsemail vid kontoradering — INGEN SMS."""
-    if not email or EMAIL_MOCK_MODE:
-        logger.info("Raderingsmail hoppades över för %s (mock-läge eller ingen e-post)", email)
+    if not email:
         return
     email_provider.send(
         to=email,
@@ -159,12 +152,12 @@ def send_welcome(email=None, phone=None, sites=None):
 
 
 def _send_welcome(sub, sites):
-    """Skickar välkomstmeddelande via SMS och/eller e-post — bara om riktiga credentials finns."""
-    if sub.get("phone") and not SMS_MOCK_MODE:
+    """Skickar välkomstmeddelande via SMS och/eller e-post."""
+    if sub.get("phone"):
         sms_provider.send(to=sub["phone"], message=messages.welcome_sms())
         logger.info("Välkomst-SMS skickat till %s", sub["phone"])
 
-    if sub.get("email") and not EMAIL_MOCK_MODE:
+    if sub.get("email"):
         email_provider.send(
             to=sub["email"],
             subject=messages.welcome_email_subject(),
@@ -189,7 +182,7 @@ def unsubscribe(user_id, sites=None):
 
 def _send_unsubscribe_confirmation(sub, sites):
     """Skickar avslutningsbekräftelse — endast via mail, inte SMS."""
-    if sub.get("email") and not EMAIL_MOCK_MODE:
+    if sub.get("email"):
         email_provider.send(
             to=sub["email"],
             subject=messages.unsubscribe_email_subject(),

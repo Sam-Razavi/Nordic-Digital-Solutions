@@ -1,13 +1,18 @@
-"""Tests for Notification Service mock mode."""
+"""Tests for Notification Service with SQLite storage."""
 
 import os
+import tempfile
+import pytest
+from unittest.mock import patch
 
-os.environ["NOTIFICATION_MOCK_MODE"] = "true"
+os.environ["NOTIFICATION_SQLITE_DB"] = os.path.join(
+    tempfile.mkdtemp(), "test_notification.db"
+)
 
 from fastapi.testclient import TestClient
+from fastapi import FastAPI
 
 import services.notification.db as db
-from services.notification.providers import MockEmailProvider, MockSMSProvider
 from services.notification.routes import router
 from services.notification.service import (
     get_subscribers,
@@ -16,36 +21,58 @@ from services.notification.service import (
     trigger_for_location,
 )
 
-from fastapi import FastAPI
-
-
 _app = FastAPI()
 _app.include_router(router)
 client = TestClient(_app)
 
-
-def clear_mock_db():
-    db._mock_subscribers.clear()
-    db._mock_sent_log.clear()
-    db._mock_visited.clear()
+_OK_SMS = {"success": True, "channel": "sms", "detail": {}}
+_OK_EMAIL = {"success": True, "channel": "email", "detail": {}}
 
 
-def test_notification_uses_mock_storage():
-    assert db.using_mock_storage() is True
+@pytest.fixture(autouse=True)
+def _fresh_db():
+    """Re-create the SQLite tables before every test."""
+    conn = db._connect()
+    with conn:
+        conn.execute("DELETE FROM sent_log")
+        conn.execute("DELETE FROM subscriber_sites")
+        conn.execute("DELETE FROM subscribers")
+    conn.close()
 
 
-def test_mock_sms_provider_returns_success():
-    result = MockSMSProvider().send("+46701234567", "Hej!")
-    assert result == {"success": True, "channel": "sms", "detail": {"mock": True}}
+def test_db_init_creates_tables():
+    conn = db._connect()
+    cur = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+    )
+    tables = [r["name"] for r in cur.fetchall()]
+    conn.close()
+    assert "subscribers" in tables
+    assert "subscriber_sites" in tables
+    assert "sent_log" in tables
 
 
-def test_mock_email_provider_returns_success():
-    result = MockEmailProvider().send("test@example.com", "Test", "Hej!")
-    assert result == {"success": True, "channel": "email", "detail": {"mock": True}}
+@patch("services.notification.service.sms_provider")
+def test_sms_provider_called(mock_sms):
+    mock_sms.send.return_value = _OK_SMS
+    result = send_notification("sms", "+46701234567", "Hej!")
+    assert result["success"] is True
+    mock_sms.send.assert_called_once()
 
 
-def test_subscribe_uses_in_memory_db():
-    clear_mock_db()
+@patch("services.notification.service.email_provider")
+def test_email_provider_called(mock_email):
+    mock_email.send.return_value = _OK_EMAIL
+    result = send_notification("email", "test@example.com", "Hej!", subject="Test")
+    assert result["success"] is True
+    mock_email.send.assert_called_once()
+
+
+@patch("services.notification.service.sms_provider")
+@patch("services.notification.service.email_provider")
+def test_subscribe_stores_in_sqlite(mock_email, mock_sms):
+    mock_sms.send.return_value = _OK_SMS
+    mock_email.send.return_value = _OK_EMAIL
     result = subscribe(
         "user_1",
         phone="+46701234567",
@@ -54,31 +81,30 @@ def test_subscribe_uses_in_memory_db():
     )
 
     assert result["success"] is True
-    assert get_subscribers()["user_1"]["phone"] == "+46701234567"
-    assert get_subscribers()["user_1"]["email"] == "test@example.com"
-    assert get_subscribers()["user_1"]["sites"] == ["site_1"]
+    subs = get_subscribers()
+    assert subs["user_1"]["phone"] == "+46701234567"
+    assert subs["user_1"]["email"] == "test@example.com"
+    assert subs["user_1"]["sites"] == ["site_1"]
 
 
-def test_send_notification_returns_success_in_mock_mode():
-    clear_mock_db()
-    result = send_notification("sms", "+46701234567", "Hej!", user_id="u1", site_id="s1")
-
-    assert result["success"] is True
-    assert result["channel"] == "sms"
-
-
-def test_trigger_for_location_uses_mock_providers():
-    clear_mock_db()
+@patch("services.notification.service.sms_provider")
+@patch("services.notification.service.email_provider")
+def test_trigger_for_location(mock_email, mock_sms):
+    mock_sms.send.return_value = _OK_SMS
+    mock_email.send.return_value = _OK_EMAIL
     subscribe("user_1", phone="+46701234567", email="test@example.com", sites=["site_1"])
 
     results = trigger_for_location("user_1", "site_1", "Drottningholm")
 
     assert len(results) == 2
-    assert all(result["success"] for result in results)
+    assert all(r["success"] for r in results)
 
 
-def test_subscribe_route_works_in_mock_mode():
-    clear_mock_db()
+@patch("services.notification.service.sms_provider")
+@patch("services.notification.service.email_provider")
+def test_subscribe_route(mock_email, mock_sms):
+    mock_sms.send.return_value = _OK_SMS
+    mock_email.send.return_value = _OK_EMAIL
     response = client.post(
         "/api/notification/subscribe",
         json={
