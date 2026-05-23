@@ -8,11 +8,11 @@ venv/
 # OS
 .DS_Store
 
-# Certificates
-certs/
-*.pem
-*.p12
+# Certificates — binary key formats stay out of git
+# The BankID test .pem files (certs/*.pem) are tracked intentionally:
+# they are BankID's publicly distributed test-environment files, not secret production keys.
 *.pfx
+*.p12
 
 # Google credentials
 services/translation/credentials/
