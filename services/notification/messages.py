@@ -59,7 +59,6 @@ def location_sms(site_name, link=None):
     msg = f"Du är nära {site_name} - ett av UNESCO:s världsarv. Ta chansen att upptäcka det."
     if link:
         msg += f" Läs mer: {link}"
-    msg += " Svara STOP för att avsluta."
     return msg
 
 
