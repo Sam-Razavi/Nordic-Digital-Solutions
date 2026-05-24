@@ -22,8 +22,7 @@ def _connect():
 
 def init_db():
     """Create tables if they do not already exist."""
-    global _use_mock_storage
-
+    conn = _connect()
     with conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS subscribers (
