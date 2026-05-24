@@ -1,6 +1,6 @@
 """
 PostgreSQL storage for notification subscribers and sent notifications.
-Falls back to in-memory storage when notification mock mode is active.
+Falls back to in-memory storage when no PostgreSQL configuration is available.
 """
 
 import time
@@ -10,8 +10,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 from services.notification.config import (
-    NOTIFICATION_MOCK_MODE,
-    DATABASE_URL,
+    NOTIFICATION_DATABASE_URL,
+    NOTIFICATION_STORAGE_MOCK_MODE,
     PG_DATABASE,
     PG_HOST,
     PG_PASSWORD,
@@ -20,8 +20,7 @@ from services.notification.config import (
 )
 
 logger = logging.getLogger("notification")
-# Always use actual database if we have DATABASE_URL (Railway)
-_use_mock_storage = False if DATABASE_URL else NOTIFICATION_MOCK_MODE
+_use_mock_storage = NOTIFICATION_STORAGE_MOCK_MODE
 
 _mock_subscribers = {}
 _mock_sent_log = {}
@@ -51,8 +50,8 @@ def _connect():
     if _mock_enabled():
         raise RuntimeError("Using notification mock mode - no DB connection")
 
-    if DATABASE_URL:
-        return psycopg2.connect(DATABASE_URL)
+    if NOTIFICATION_DATABASE_URL:
+        return psycopg2.connect(NOTIFICATION_DATABASE_URL)
 
     conn = psycopg2.connect(
         host=PG_HOST,
@@ -73,7 +72,7 @@ def init_db():
 
     try:
         conn = _connect()
-    except psycopg2.Error as exc:
+    except (RuntimeError, psycopg2.Error) as exc:
         logger.warning(
             "Notification database init failed: %s. Falling back to in-memory mock storage.",
             exc,

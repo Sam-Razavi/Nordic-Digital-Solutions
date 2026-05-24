@@ -28,8 +28,8 @@ logger = logging.getLogger("notification")
 db.init_db()
 
 # Provider-instanser väljs per kanal baserat på tillgängliga credentials
-sms_provider = MockSMSProvider() if (SMS_MOCK_MODE or db.using_mock_storage()) else SMSProvider()
-email_provider = MockEmailProvider() if (EMAIL_MOCK_MODE or db.using_mock_storage()) else EmailProvider()
+sms_provider = MockSMSProvider() if SMS_MOCK_MODE else SMSProvider()
+email_provider = MockEmailProvider() if EMAIL_MOCK_MODE else EmailProvider()
 
 VALID_TYPES = ("sms", "email")
 _PHONE_RE = re.compile(r"^\+?[0-9\s\-]{7,15}$")
