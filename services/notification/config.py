@@ -47,6 +47,15 @@ COOLDOWN_SMS_SECONDS = COOLDOWN_SMS_HOURS * 3600
 COOLDOWN_EMAIL_SECONDS = COOLDOWN_EMAIL_HOURS * 3600
 
 # PostgreSQL-anslutning
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+NOTIFICATION_DATABASE_URL = os.getenv("NOTIFICATION_DATABASE_URL", "")
+
+if (
+    not NOTIFICATION_DATABASE_URL
+    and DATABASE_URL.startswith(("postgresql://", "postgres://"))
+):
+    NOTIFICATION_DATABASE_URL = DATABASE_URL
+
 PG_HOST = os.getenv("NOTIFICATION_PG_HOST", "localhost")
 PG_PORT = int(os.getenv("NOTIFICATION_PG_PORT", "5432"))
 PG_DATABASE = os.getenv("NOTIFICATION_PG_DATABASE", "notification")
@@ -63,6 +72,14 @@ NOTIFICATION_MOCK_MODE = _explicit_mock or not bool(
     HELLOSMS_USERNAME
     and HELLOSMS_PASSWORD
     and SMTP2GO_API_KEY
+)
+
+_storage_mock_env = os.getenv("NOTIFICATION_STORAGE_MOCK_MODE", "").lower()
+_explicit_storage_mock = _storage_mock_env in {"1", "true", "yes", "on"}
+
+NOTIFICATION_STORAGE_MOCK_MODE = _explicit_storage_mock or not bool(
+    NOTIFICATION_DATABASE_URL
+    or (PG_USER and PG_PASSWORD and PG_DATABASE)
 )
 
 _welcome_env = os.getenv("SEND_WELCOME_NOTIFICATIONS", "").lower()
