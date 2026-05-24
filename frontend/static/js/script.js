@@ -387,6 +387,7 @@ async function showChatIfLoggedIn() {
    if (!token) return;
 
    try {
+      await syncSubscriptionStatus();
       const user = await apiFetch("/auth/me");
       document.getElementById("userInfoPanel").hidden = false;
       document.getElementById("userNameDisplay").textContent = user.full_name || user.email;
@@ -801,6 +802,7 @@ async function subscribe(event) {
       });
 
       if (method === "card" && payment.url) {
+         localStorage.setItem("stripe_pending_token", sessionStorage.getItem("auth_token"));
          window.location.href = payment.url;
          return;
       }
@@ -864,9 +866,16 @@ async function login(event) {
 
       sessionStorage.setItem("auth_token", result.access_token);
       sessionStorage.setItem("user_email", document.getElementById("loginEmail").value.trim());
+
+      if (sessionStorage.getItem("pending_activation") === "true") {
+         await apiFetch("/auth/subscription/activate", { method: "POST" }).catch(() => {});
+         sessionStorage.removeItem("pending_activation");
+      }
+
       await syncSubscriptionStatus();
       setStatus(loginStatus, "Inloggad.");
-      showLoggedIn();
+      await showLoggedIn();
+      if (sites.length) renderMap("member-map-view", "member");
    } catch (error) {
       setStatus(loginStatus, error.message, true);
    }
@@ -885,9 +894,16 @@ async function completeTwoFactor(event) {
          }),
       });
       sessionStorage.setItem("auth_token", result.access_token);
+
+      if (sessionStorage.getItem("pending_activation") === "true") {
+         await apiFetch("/auth/subscription/activate", { method: "POST" }).catch(() => {});
+         sessionStorage.removeItem("pending_activation");
+      }
+
       await syncSubscriptionStatus();
       setStatus(loginStatus, "Inloggad.");
-      showLoggedIn();
+      await showLoggedIn();
+      if (sites.length) renderMap("member-map-view", "member");
    } catch (error) {
       setStatus(loginStatus, error.message, true);
    }
@@ -1069,18 +1085,69 @@ document.addEventListener("keydown", (event) => {
    history.replaceState({}, "", "/");
 
    if (payment === "success") {
-      const token = sessionStorage.getItem("auth_token");
+      let token = sessionStorage.getItem("auth_token");
+      if (!token) {
+         const saved = localStorage.getItem("stripe_pending_token");
+         if (saved) {
+            sessionStorage.setItem("auth_token", saved);
+            token = saved;
+         }
+      }
+      localStorage.removeItem("stripe_pending_token");
+
       if (token) {
          await apiFetch("/auth/subscription/activate", { method: "POST" }).catch(() => {});
          sessionStorage.setItem("has_subscription", "true");
-         await ensureWidgetLoaded();
          openModal(memberModal);
          await showLoggedIn();
+         await ensureWidgetLoaded();
+         renderSiteSummary();
          if (sites.length) renderMap("member-map-view", "member");
+      } else {
+         sessionStorage.setItem("pending_activation", "true");
+         await ensureWidgetLoaded();
+         openModal(memberModal);
+         setStatus(loginStatus, "Betalningen lyckades! Logga in för att aktivera din prenumeration.");
       }
    } else if (payment === "cancelled") {
       await ensureWidgetLoaded();
       openModal(visitorModal);
       setStatus(widgetStatus, "Betalningen avbröts. Försök igen om du vill.");
+   }
+})();
+
+// Hantera SMS-länk med ?id= parameter (öppnar specifikt världsarv)
+(async () => {
+   const params = new URLSearchParams(window.location.search);
+   const targetSiteId = params.get("id");
+   if (!targetSiteId) return;
+
+   openModal(visitorModal);
+   await ensureWidgetLoaded();
+
+   let target = sites.find(
+      (s) => String(s.id_no) === targetSiteId || String(s.id) === targetSiteId
+   );
+
+   if (!target) {
+      try {
+         const allSites = await apiFetch(`/unesco/sites?radius=50000`);
+         target = allSites.find(
+            (s) => String(s.id_no) === targetSiteId || String(s.id) === targetSiteId
+         );
+      } catch { /* ignorera */ }
+   }
+
+   if (target) {
+      selectSite(target);
+
+      const coords = getCoordinates(target);
+      if (coords && visitorMap) {
+         visitorMap.setView([coords.lat, coords.lon], 12);
+         L.marker([coords.lat, coords.lon])
+            .addTo(visitorMap)
+            .bindPopup(target.name_en || "UNESCO World Heritage Site")
+            .openPopup();
+      }
    }
 })();

@@ -6,16 +6,11 @@ import logging
 import re
 from services.notification.providers import (
     EmailProvider,
-    MockEmailProvider,
-    MockSMSProvider,
     SMSProvider,
 )
 from services.notification.config import (
     COOLDOWN_SMS_SECONDS,
     COOLDOWN_EMAIL_SECONDS,
-    NOTIFICATION_MOCK_MODE,
-    SMS_MOCK_MODE,
-    EMAIL_MOCK_MODE,
     SEND_WELCOME_NOTIFICATIONS,
     SITE_PAGE_BASE_URL,
 )
@@ -27,9 +22,8 @@ logger = logging.getLogger("notification")
 # Initiera databasen vid import
 db.init_db()
 
-# Provider-instanser väljs per kanal baserat på tillgängliga credentials
-sms_provider = MockSMSProvider() if SMS_MOCK_MODE else SMSProvider()
-email_provider = MockEmailProvider() if EMAIL_MOCK_MODE else EmailProvider()
+sms_provider = SMSProvider()
+email_provider = EmailProvider()
 
 VALID_TYPES = ("sms", "email")
 _PHONE_RE = re.compile(r"^\+?[0-9\s\-]{7,15}$")
@@ -137,8 +131,7 @@ def subscribe(user_id, phone=None, email=None, sites=None):
 
 def send_account_deleted_email(email: str):
     """Skickar bekräftelsemail vid kontoradering — INGEN SMS."""
-    if not email or EMAIL_MOCK_MODE:
-        logger.info("Raderingsmail hoppades över för %s (mock-läge eller ingen e-post)", email)
+    if not email:
         return
     email_provider.send(
         to=email,
@@ -159,12 +152,12 @@ def send_welcome(email=None, phone=None, sites=None):
 
 
 def _send_welcome(sub, sites):
-    """Skickar välkomstmeddelande via SMS och/eller e-post — bara om riktiga credentials finns."""
-    if sub.get("phone") and not SMS_MOCK_MODE:
+    """Skickar välkomstmeddelande via SMS och/eller e-post."""
+    if sub.get("phone"):
         sms_provider.send(to=sub["phone"], message=messages.welcome_sms())
         logger.info("Välkomst-SMS skickat till %s", sub["phone"])
 
-    if sub.get("email") and not EMAIL_MOCK_MODE:
+    if sub.get("email"):
         email_provider.send(
             to=sub["email"],
             subject=messages.welcome_email_subject(),
@@ -189,7 +182,7 @@ def unsubscribe(user_id, sites=None):
 
 def _send_unsubscribe_confirmation(sub, sites):
     """Skickar avslutningsbekräftelse — endast via mail, inte SMS."""
-    if sub.get("email") and not EMAIL_MOCK_MODE:
+    if sub.get("email"):
         email_provider.send(
             to=sub["email"],
             subject=messages.unsubscribe_email_subject(),
@@ -217,6 +210,37 @@ def mark_visited(user_id, site_id):
     db.mark_visited(user_id, site_id)
     logger.info("Markerade site=%s som besökt för user=%s", site_id, user_id)
     return {"success": True, "user_id": user_id, "site_id": site_id, "visited": True}
+
+
+def trigger_for_coordinates(user_id, latitude, longitude, radius_km=150):
+    """
+    Tar emot användarens koordinater, hittar närmaste världsarv
+    via UNESCO-tjänsten och triggar notis automatiskt.
+    """
+    from services.unesco.service import get_sites_near
+
+    sub = db.get_subscriber(user_id)
+    if not sub:
+        return {"success": False, "error": "Användaren har ingen prenumeration."}
+
+    nearby = get_sites_near(lat=latitude, lon=longitude, radius_km=radius_km)
+    if not nearby:
+        return {"success": False, "error": "Inga världsarv hittades inom räckhåll."}
+
+    nearest = nearby[0]
+    site_id = str(nearest.get("id_no") or nearest.get("id") or nearest.get("name_en", "site"))
+    site_name = nearest.get("name_en", "Okänt världsarv")
+    distance_km = nearest.get("distance_km")
+
+    results = trigger_for_location(user_id, site_id, site_name)
+
+    return {
+        "success": any(r.get("success") for r in results),
+        "site_id": site_id,
+        "site_name": site_name,
+        "distance_km": distance_km,
+        "notifications": results,
+    }
 
 
 def trigger_for_location(user_id, site_id, site_name, link=None):
