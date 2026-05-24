@@ -22,8 +22,7 @@ def _connect():
 
 def init_db():
     """Create tables if they do not already exist."""
-    os.makedirs(os.path.dirname(SQLITE_DB_PATH), exist_ok=True)
-    conn = _connect()
+    global _use_mock_storage
 
     with conn:
         conn.execute("""
