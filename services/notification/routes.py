@@ -17,6 +17,7 @@ from services.notification.service import (
     unsubscribe,
     get_subscribers,
     trigger_for_location,
+    trigger_for_coordinates,
     mark_visited,
     VALID_TYPES,
 )
@@ -52,6 +53,13 @@ class UnsubscribeRequest(BaseModel):
 class MarkVisitedRequest(BaseModel):
     user_id: str
     site_id: str
+
+
+class LocationRequest(BaseModel):
+    latitude: float = Field(..., description="Latitud (t.ex. 60.4858)")
+    longitude: float = Field(..., description="Longitud (t.ex. 15.4358)")
+    user_id: str = Field(..., description="Användarens ID/token")
+    radius: Optional[int] = Field(150, description="Sökradie i km (standard 150)")
 
 
 # ---------- Gemensamt API ----------
@@ -93,6 +101,41 @@ def send(body: SendNotificationRequest):
         status = 400
     else:
         status = 500
+
+    return JSONResponse(status_code=status, content=result)
+
+
+# ---------- Platsbaserad notifiering ----------
+
+@router.post("/location")
+def location(body: LocationRequest):
+    """
+    POST /api/notification/location
+    Body:
+    {
+        "latitude": 60.6065,
+        "longitude": 15.6355,
+        "user_id": "abc123",
+        "radius": 150
+    }
+
+    Tar emot användarens koordinater, hittar närmaste världsarv
+    och triggar SMS/e-post automatiskt om användaren prenumererar.
+    """
+    result = trigger_for_coordinates(
+        user_id=body.user_id,
+        latitude=body.latitude,
+        longitude=body.longitude,
+        radius_km=body.radius or 150,
+    )
+
+    if result.get("error") in (
+        "Användaren har ingen prenumeration.",
+        "Inga världsarv hittades inom räckhåll.",
+    ):
+        status = 404
+    else:
+        status = 200
 
     return JSONResponse(status_code=status, content=result)
 

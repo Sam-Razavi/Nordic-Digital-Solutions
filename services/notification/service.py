@@ -212,6 +212,37 @@ def mark_visited(user_id, site_id):
     return {"success": True, "user_id": user_id, "site_id": site_id, "visited": True}
 
 
+def trigger_for_coordinates(user_id, latitude, longitude, radius_km=150):
+    """
+    Tar emot användarens koordinater, hittar närmaste världsarv
+    via UNESCO-tjänsten och triggar notis automatiskt.
+    """
+    from services.unesco.service import get_sites_near
+
+    sub = db.get_subscriber(user_id)
+    if not sub:
+        return {"success": False, "error": "Användaren har ingen prenumeration."}
+
+    nearby = get_sites_near(lat=latitude, lon=longitude, radius_km=radius_km)
+    if not nearby:
+        return {"success": False, "error": "Inga världsarv hittades inom räckhåll."}
+
+    nearest = nearby[0]
+    site_id = str(nearest.get("id_no") or nearest.get("id") or nearest.get("name_en", "site"))
+    site_name = nearest.get("name_en", "Okänt världsarv")
+    distance_km = nearest.get("distance_km")
+
+    results = trigger_for_location(user_id, site_id, site_name)
+
+    return {
+        "success": any(r.get("success") for r in results),
+        "site_id": site_id,
+        "site_name": site_name,
+        "distance_km": distance_km,
+        "notifications": results,
+    }
+
+
 def trigger_for_location(user_id, site_id, site_name, link=None):
     """
     Triggas när en användare är nära ett världsarv.
