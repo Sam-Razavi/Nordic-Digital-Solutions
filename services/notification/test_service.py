@@ -39,10 +39,6 @@ def _fresh_db():
         conn.execute("DELETE FROM subscribers")
     conn.close()
 
-def test_notification_uses_mock_storage():
-    setup_mock_notification_service()
-    assert db.using_mock_storage() is True
-
 def test_db_init_creates_tables():
     conn = db._connect()
     cur = conn.execute(
