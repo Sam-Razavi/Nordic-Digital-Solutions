@@ -2,7 +2,7 @@
 # Modul: Betaltjänst
 
 import os
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from services.payment.service import PaymentService
@@ -21,6 +21,7 @@ class CreateSubscriptionRequest(BaseModel):
     user_id: str
     plan_id: str
     method: str = "card"
+    origin: str | None = None
 
 
 class CancelSubscriptionRequest(BaseModel):
@@ -29,15 +30,18 @@ class CancelSubscriptionRequest(BaseModel):
 
 
 @router.post("/create")
-def payment_create(body: CreateSubscriptionRequest):
+def payment_create(body: CreateSubscriptionRequest, request: Request):
     """Skapa en prenumeration och returnera Stripe-checkout-URL."""
     try:
         if body.method == "card":
+            # Använd origin från frontend (fungerar bakom reverse proxy)
+            # Fallback till request.base_url om origin saknas
+            base = body.origin.rstrip("/") if body.origin else str(request.base_url).rstrip("/")
             stripe_price_id = _STRIPE_PRICE_MAP.get(body.plan_id, body.plan_id)
             record = payment_service.create_checkout_session(
                 price_id=stripe_price_id,
-                success_url="http://localhost:8000/?payment=success",
-                cancel_url="http://localhost:8000/?payment=cancelled",
+                success_url=f"{base}/?payment=success",
+                cancel_url=f"{base}/?payment=cancelled",
             )
         else:
             record = payment_service.create_subscription(body.user_id, body.plan_id, method=body.method)
@@ -111,6 +115,6 @@ def payment_cancel_page():
   <div class="icon">↩️</div>
   <h1>Betalningen avbröts.</h1>
   <p>Inga pengar har dragits.</p>
-  <a href="http://localhost:8000">Försök igen</a>
+  <a href="/">Försök igen</a>
 </div>
 </body></html>"""

@@ -444,8 +444,13 @@ async function load2faStatus() {
       document.getElementById("twoFaSetupBox").hidden = true;
       document.getElementById("twoFaDisableBox").hidden = true;
       setStatus(twoFaStatus, "");
-   } catch (error) {
-      setStatus(twoFaStatus, error.message, true);
+   } catch {
+      // Token expired (t.ex. efter Stripe-retur) — visa neutral status utan felmeddelande
+      document.getElementById("twoFaStatusText").textContent = "Status: Inaktiv";
+      const btn = document.getElementById("twoFaActionBtn");
+      btn.textContent = "Aktivera 2FA";
+      btn.dataset.enabled = "false";
+      setStatus(twoFaStatus, "");
    }
 }
 
@@ -798,11 +803,15 @@ async function subscribe(event) {
 
       const payment = await apiFetch("/payment/create", {
          method: "POST",
-         body: JSON.stringify({ user_id: userId, plan_id: "plan_basic", method }),
+         body: JSON.stringify({ user_id: userId, plan_id: "plan_basic", method, origin: window.location.origin }),
       });
 
       if (method === "card" && payment.url) {
-         localStorage.setItem("stripe_pending_token", sessionStorage.getItem("auth_token"));
+         const currentToken = sessionStorage.getItem("auth_token");
+         if (currentToken) {
+            localStorage.setItem("stripe_pending_token", currentToken);
+            localStorage.setItem("stripe_pending_email", email || sessionStorage.getItem("user_email") || "");
+         }
          window.location.href = payment.url;
          return;
       }
@@ -1088,18 +1097,36 @@ document.addEventListener("keydown", (event) => {
       let token = sessionStorage.getItem("auth_token");
       if (!token) {
          const saved = localStorage.getItem("stripe_pending_token");
-         if (saved) {
+         if (saved && saved !== "null") {
             sessionStorage.setItem("auth_token", saved);
             token = saved;
          }
       }
+      const savedEmail = localStorage.getItem("stripe_pending_email") || "";
+      if (savedEmail) sessionStorage.setItem("user_email", savedEmail);
       localStorage.removeItem("stripe_pending_token");
+      localStorage.removeItem("stripe_pending_email");
 
       if (token) {
-         await apiFetch("/auth/subscription/activate", { method: "POST" }).catch(() => {});
+         // Försök aktivera prenumeration — om token expired, gör det ändå visuellt
+         const activated = await apiFetch("/auth/subscription/activate", { method: "POST" }).catch(() => null);
          sessionStorage.setItem("has_subscription", "true");
          openModal(memberModal);
-         await showLoggedIn();
+
+         if (activated) {
+            // Token giltig — full premium-vy
+            await showLoggedIn();
+         } else {
+            // Token expired — visa premium men med sparad email
+            loginForm.hidden = true;
+            twoFactorForm.hidden = true;
+            document.getElementById("memberBankidSection").hidden = true;
+            document.getElementById("userInfoPanel").hidden = false;
+            document.getElementById("userNameDisplay").textContent = savedEmail || "Prenumerant";
+            document.getElementById("userEmailDisplay").textContent = "";
+            activatePremium();
+         }
+
          await ensureWidgetLoaded();
          renderSiteSummary();
          if (sites.length) renderMap("member-map-view", "member");
