@@ -22,8 +22,9 @@ logger = logging.getLogger("notification")
 # Initiera databasen vid import
 db.init_db()
 
-sms_provider = SMSProvider()
-email_provider = EmailProvider()
+# Provider-instanser väljs per kanal baserat på tillgängliga credentials
+sms_provider = MockSMSProvider() if SMS_MOCK_MODE else SMSProvider()
+email_provider = MockEmailProvider() if EMAIL_MOCK_MODE else EmailProvider()
 
 VALID_TYPES = ("sms", "email")
 _PHONE_RE = re.compile(r"^\+?[0-9\s\-]{7,15}$")

@@ -1,5 +1,6 @@
 """
-SQLite storage for notification subscribers and sent notifications.
+PostgreSQL storage for notification subscribers and sent notifications.
+Falls back to in-memory storage when no PostgreSQL configuration is available.
 """
 
 import os
@@ -7,23 +8,79 @@ import time
 import sqlite3
 import logging
 
-from services.notification.config import SQLITE_DB_PATH
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+from services.notification.config import (
+    NOTIFICATION_DATABASE_URL,
+    NOTIFICATION_STORAGE_MOCK_MODE,
+    PG_DATABASE,
+    PG_HOST,
+    PG_PASSWORD,
+    PG_PORT,
+    PG_USER,
+)
 
 logger = logging.getLogger("notification")
+_use_mock_storage = NOTIFICATION_STORAGE_MOCK_MODE
+
+_mock_subscribers = {}
+_mock_sent_log = {}
+_mock_visited = set()
+
+
+def _mock_enabled():
+    return _use_mock_storage
+
+
+def using_mock_storage():
+    return _mock_enabled()
+
+
+def _get_mock_subscriber(user_id):
+    sub = _mock_subscribers.get(user_id)
+    if not sub:
+        return None
+    return {
+        "phone": sub.get("phone"),
+        "email": sub.get("email"),
+        "sites": list(sub.get("sites", [])),
+    }
 
 
 def _connect():
-    conn = sqlite3.connect(SQLITE_DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA foreign_keys=ON")
+    if _mock_enabled():
+        raise RuntimeError("Using notification mock mode - no DB connection")
+
+    if NOTIFICATION_DATABASE_URL:
+        return psycopg2.connect(NOTIFICATION_DATABASE_URL)
+
+    conn = psycopg2.connect(
+        host=PG_HOST,
+        port=PG_PORT,
+        dbname=PG_DATABASE,
+        user=PG_USER,
+        password=PG_PASSWORD,
+    )
     return conn
 
 
 def init_db():
     """Create tables if they do not already exist."""
-    os.makedirs(os.path.dirname(SQLITE_DB_PATH), exist_ok=True)
-    conn = _connect()
+    global _use_mock_storage
+
+    if _mock_enabled():
+        return
+
+    try:
+        conn = _connect()
+    except (RuntimeError, psycopg2.Error) as exc:
+        logger.warning(
+            "Notification database init failed: %s. Falling back to in-memory mock storage.",
+            exc,
+        )
+        _use_mock_storage = True
+        return
 
     with conn:
         conn.execute("""

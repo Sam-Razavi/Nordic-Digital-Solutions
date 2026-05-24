@@ -46,10 +46,40 @@ COOLDOWN_EMAIL_HOURS = int(os.getenv("NOTIFICATION_COOLDOWN_EMAIL_HOURS", "168")
 COOLDOWN_SMS_SECONDS = COOLDOWN_SMS_HOURS * 3600
 COOLDOWN_EMAIL_SECONDS = COOLDOWN_EMAIL_HOURS * 3600
 
-# SQLite-databasfil
-SQLITE_DB_PATH = os.getenv(
-    "NOTIFICATION_SQLITE_DB",
-    os.path.join(os.path.dirname(__file__), "..", "..", "data", "notification.db"),
+# PostgreSQL-anslutning
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+NOTIFICATION_DATABASE_URL = os.getenv("NOTIFICATION_DATABASE_URL", "")
+
+if (
+    not NOTIFICATION_DATABASE_URL
+    and DATABASE_URL.startswith(("postgresql://", "postgres://"))
+):
+    NOTIFICATION_DATABASE_URL = DATABASE_URL
+
+PG_HOST = os.getenv("NOTIFICATION_PG_HOST", "localhost")
+PG_PORT = int(os.getenv("NOTIFICATION_PG_PORT", "5432"))
+PG_DATABASE = os.getenv("NOTIFICATION_PG_DATABASE", "notification")
+PG_USER = os.getenv("NOTIFICATION_PG_USER", "")
+PG_PASSWORD = os.getenv("NOTIFICATION_PG_PASSWORD", "")
+
+_mock_mode_env = os.getenv("NOTIFICATION_MOCK_MODE", "").lower()
+_explicit_mock = _mock_mode_env in {"1", "true", "yes", "on"}
+
+SMS_MOCK_MODE = _explicit_mock or not bool(HELLOSMS_USERNAME and HELLOSMS_PASSWORD)
+EMAIL_MOCK_MODE = _explicit_mock or not bool(SMTP2GO_API_KEY)
+
+NOTIFICATION_MOCK_MODE = _explicit_mock or not bool(
+    HELLOSMS_USERNAME
+    and HELLOSMS_PASSWORD
+    and SMTP2GO_API_KEY
+)
+
+_storage_mock_env = os.getenv("NOTIFICATION_STORAGE_MOCK_MODE", "").lower()
+_explicit_storage_mock = _storage_mock_env in {"1", "true", "yes", "on"}
+
+NOTIFICATION_STORAGE_MOCK_MODE = _explicit_storage_mock or not bool(
+    NOTIFICATION_DATABASE_URL
+    or (PG_USER and PG_PASSWORD and PG_DATABASE)
 )
 
 _welcome_env = os.getenv("SEND_WELCOME_NOTIFICATIONS", "").lower()

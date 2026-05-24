@@ -5,14 +5,15 @@ import tempfile
 import pytest
 from unittest.mock import patch
 
-os.environ["NOTIFICATION_SQLITE_DB"] = os.path.join(
-    tempfile.mkdtemp(), "test_notification.db"
-)
+os.environ["NOTIFICATION_MOCK_MODE"] = "true"
+os.environ["NOTIFICATION_STORAGE_MOCK_MODE"] = "true"
 
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
 import services.notification.db as db
+import services.notification.service as notification_service
+from services.notification.providers import MockEmailProvider, MockSMSProvider
 from services.notification.routes import router
 from services.notification.service import (
     get_subscribers,
@@ -28,6 +29,17 @@ client = TestClient(_app)
 _OK_SMS = {"success": True, "channel": "sms", "detail": {}}
 _OK_EMAIL = {"success": True, "channel": "email", "detail": {}}
 
+def setup_mock_notification_service():
+    db._use_mock_storage = True
+    notification_service.sms_provider = MockSMSProvider()
+    notification_service.email_provider = MockEmailProvider()
+
+
+def clear_mock_db():
+    setup_mock_notification_service()
+    db._mock_subscribers.clear()
+    db._mock_sent_log.clear()
+    db._mock_visited.clear()
 
 @pytest.fixture(autouse=True)
 def _fresh_db():
@@ -39,6 +51,9 @@ def _fresh_db():
         conn.execute("DELETE FROM subscribers")
     conn.close()
 
+def test_notification_uses_mock_storage():
+    setup_mock_notification_service()
+    assert db.using_mock_storage() is True
 
 def test_db_init_creates_tables():
     conn = db._connect()
