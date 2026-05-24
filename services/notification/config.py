@@ -52,5 +52,13 @@ SQLITE_DB_PATH = os.getenv(
     os.path.join(os.path.dirname(__file__), "..", "..", "data", "notification.db"),
 )
 
+_storage_mock_env = os.getenv("NOTIFICATION_STORAGE_MOCK_MODE", "").lower()
+_explicit_storage_mock = _storage_mock_env in {"1", "true", "yes", "on"}
+
+NOTIFICATION_STORAGE_MOCK_MODE = _explicit_storage_mock or not bool(
+    NOTIFICATION_DATABASE_URL
+    or (PG_USER and PG_PASSWORD and PG_DATABASE)
+)
+
 _welcome_env = os.getenv("SEND_WELCOME_NOTIFICATIONS", "").lower()
 SEND_WELCOME_NOTIFICATIONS = _welcome_env in {"1", "true", "yes", "on"}
