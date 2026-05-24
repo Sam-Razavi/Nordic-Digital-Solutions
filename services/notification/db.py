@@ -11,6 +11,7 @@ from psycopg2.extras import RealDictCursor
 
 from services.notification.config import (
     NOTIFICATION_MOCK_MODE,
+    DATABASE_URL,
     PG_DATABASE,
     PG_HOST,
     PG_PASSWORD,
@@ -19,7 +20,8 @@ from services.notification.config import (
 )
 
 logger = logging.getLogger("notification")
-_use_mock_storage = NOTIFICATION_MOCK_MODE
+# Always use actual database if we have DATABASE_URL (Railway)
+_use_mock_storage = False if DATABASE_URL else NOTIFICATION_MOCK_MODE
 
 _mock_subscribers = {}
 _mock_sent_log = {}
@@ -48,6 +50,9 @@ def _get_mock_subscriber(user_id):
 def _connect():
     if _mock_enabled():
         raise RuntimeError("Using notification mock mode - no DB connection")
+
+    if DATABASE_URL:
+        return psycopg2.connect(DATABASE_URL)
 
     conn = psycopg2.connect(
         host=PG_HOST,
