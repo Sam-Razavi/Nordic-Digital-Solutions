@@ -1,3 +1,5 @@
+<img width="104" height="90" alt="image" src="https://github.com/user-attachments/assets/9d8df629-4934-4d71-ade4-c5dfb32d80af" />
+
 # Nordic Digital Solutions
 
 > **Kursproject — Utveckling av digitala tjänster · Högskolan Dalarna**
