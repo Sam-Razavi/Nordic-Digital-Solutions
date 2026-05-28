@@ -51,31 +51,37 @@ The project was built as a five-person university assignment demonstrating a rea
 ---
 
 ### 1 — Newspaper Landing Page
-![Newspaper landing page](docs/screenshots/01-newspaper-landing.png)
+<img width="2507" height="1173" alt="image" src="https://github.com/user-attachments/assets/411d3238-9b0a-4d0b-9642-e780f243c613" />
+
 > *The DAGSTIDNINGEN newspaper widget as it appears embedded on a web page. A mock Swedish newspaper article fills the page; the UNESCO "WORLD HERITAGE SERVICE" banner ad in the article body is the entry point to the entire service.*
 
 ---
 
 ### 2 — UNESCO Site Discovery Map (Visitor View)
-![UNESCO site discovery map](docs/screenshots/02-visitor-map.png)
+<img width="2491" height="1170" alt="image" src="https://github.com/user-attachments/assets/13896cc2-568b-42ba-a8a0-7dd465353a1c" />
+
 > *After clicking the banner ad, the visitor modal opens showing an interactive Leaflet.js map with markers for all UNESCO World Heritage sites within 150 km of the user's current location. The distance and site count are shown in the summary card above the map.*
 
 ---
 
 ### 3 — Site List with Distances
-![Site list with distances](docs/screenshots/03-site-list.png)
+<img width="802" height="459" alt="image" src="https://github.com/user-attachments/assets/6c6ac241-d1f2-479b-b791-4ca3be0ad05f" />
+
+
 > *Below the map, a scrollable list of heritage sites sorted by distance from the user. Each row shows the site name, country, category (cultural/natural/mixed), and distance in kilometres. Clicking a row opens the site detail view.*
 
 ---
 
 ### 4 — Site Detail with Language Selector
-![Site detail with translation](docs/screenshots/04-site-detail-translation.png)
+<img width="772" height="438" alt="image" src="https://github.com/user-attachments/assets/828437a9-4a35-4154-87ef-3effc8d4fcb6" />
+
 > *The detail panel for a selected UNESCO site. Shows the full site description in English by default. The language dropdown (powered by Google Cloud Translate, 100+ languages) lets visitors instantly translate the description into Swedish, Arabic, Japanese, or any other supported language.*
 
 ---
 
 ### 5 — Subscription & Registration Form
-![Subscription and registration form](docs/screenshots/05-subscription-form.png)
+<img width="773" height="845" alt="image" src="https://github.com/user-attachments/assets/afdd772d-13d6-4482-82c4-46ea7c617a28" />
+
 > *The premium sign-up form at the bottom of the visitor widget. Collects phone number (for SMS notifications), name, email, and password. The payment method selector offers "Faktura demo" (invoice mock) or "Kort" (Stripe card checkout). BankID is available as an alternative to password-based registration.*
 
 ---
@@ -87,55 +93,67 @@ The project was built as a five-person university assignment demonstrating a rea
 ---
 
 ### 7 — BankID Mobile QR Code Flow
-![BankID mobile QR code](docs/screenshots/07-bankid-qr.png)
+<img width="776" height="271" alt="image" src="https://github.com/user-attachments/assets/6ebeb8f7-fe20-4fa8-9c83-e4a4df49a3e5" />
+
 > *The animated QR code panel for mobile BankID. The code refreshes every second (HMAC-SHA256 animation per the BankID specification). The user opens the BankID app on their phone and scans the code to authenticate. Status polling happens automatically every 2 seconds in the background.*
 
 ---
 
 ### 8 — Invoice Payment Form (Fakturauppgifter)
-![Invoice payment form](docs/screenshots/08-invoice-form.png)
+<img width="817" height="1047" alt="image" src="https://github.com/user-attachments/assets/bef3db06-275f-47d4-9c31-de7858ced920" />
+
 > *The invoice billing form modal. Collects full name, street address, postcode, city, email for the invoice, and an optional reference/cost-centre field. The invoice mock provider stores the submission in memory and immediately activates the subscription.*
 
 ---
 
 ### 9 — Member Login — "Mina Sidor"
-![Member login screen](docs/screenshots/09-member-login.png)
+<img width="530" height="1139" alt="image" src="https://github.com/user-attachments/assets/568c1cbe-67fd-4ec6-9ccb-6ce1611e14d2" />
+
 > *The "Mina Sidor" (My Pages) modal for returning premium members. Supports email/password login and BankID login side by side. After a successful BankID login, the user is recognised by their Swedish personal number and the JWT token is issued automatically.*
 
 ---
 
 ### 10 — Two-Factor Authentication — Code Entry
-![2FA code entry](docs/screenshots/10-2fa-code-entry.png)
+<img width="789" height="901" alt="image" src="https://github.com/user-attachments/assets/997bb6ea-9560-4c0c-94b9-c33a3fb92471" />
+
+
 > *The TOTP challenge screen that appears after a correct email/password login when 2FA is enabled. The user enters the 6-digit code from their authenticator app (Google Authenticator, Authy, etc.) to complete sign-in.*
 
 ---
 
 ### 11 — Two-Factor Authentication — Setup & QR Code
-![2FA setup with QR code](docs/screenshots/11-2fa-setup.png)
+<img width="764" height="828" alt="image" src="https://github.com/user-attachments/assets/67d9d309-41d0-416c-8667-c6075718d1f9" />
+
 > *The 2FA setup panel inside "Mina Sidor". Shows a QR code provisioning URI that the user scans with an authenticator app to link their account. After scanning, the user enters a code from the app to confirm and enable 2FA.*
 
 ---
 
 ### 12 — Premium Member Dashboard
-![Premium member dashboard](docs/screenshots/12-member-dashboard.png)
+<img width="510" height="1134" alt="image" src="https://github.com/user-attachments/assets/055ed702-0b5d-44c1-b24c-c82ba4a438c8" />
+
 > *The logged-in premium member view. Shows the user's name, email, logout button, and the option to permanently delete the account and cancel the subscription. Below the user card, the nearest UNESCO site card appears with a "Jag har besökt denna plats" (I have visited this site) checkbox that suppresses future notifications for that site.*
 
 ---
 
 ### 13 — Premium Interactive Map
-![Premium member map](docs/screenshots/13-premium-map.png)
+<img width="769" height="459" alt="image" src="https://github.com/user-attachments/assets/6fffb5f5-ba0c-4007-8521-b992d7774c0c" />
+
 > *The full-size interactive Leaflet.js map available only to premium members. Compared to the visitor map, this view includes richer site data, member-specific overlays, and is tied to the user's stored home coordinates for personalised distance calculations.*
 
 ---
 
 ### 14 — AI Guide Chatbot (Premium)
-![AI chatbot interface](docs/screenshots/14-ai-chatbot.png)
+<img width="773" height="481" alt="image" src="https://github.com/user-attachments/assets/7f5921a2-0740-4e9b-bad1-54893a52bc5e" />
+
 > *The "AI-Guide (Premium)" chatbot panel powered by Anthropic Claude Haiku. Members can ask questions about any UNESCO World Heritage site shown on the map — history, significance, visiting tips, and more. The chatbot responds in the user's own language and politely declines questions unrelated to UNESCO heritage.*
 
 ---
 
 ### 15 — Account Deletion Confirmation
-![Account deletion confirmation](docs/screenshots/15-delete-account.png)
+<img width="753" height="169" alt="image" src="https://github.com/user-attachments/assets/a2759485-7256-4d93-9249-f8d3f0adc3ae" />
+<img width="769" height="388" alt="image" src="https://github.com/user-attachments/assets/080dc4a9-a0ce-42f0-9f3c-b1aa18377381" />
+
+
 > *The inline confirmation prompt that appears when a member clicks "Avsluta prenumeration och radera konto" (Cancel subscription and delete account). Requires explicit confirmation before permanently deleting the user record and cancelling the subscription.*
 
 ---
