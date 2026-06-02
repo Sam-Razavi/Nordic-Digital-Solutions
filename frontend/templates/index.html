@@ -17,7 +17,7 @@
          <header class="news-header">
             <div class="header-content">
                <h1 class="logo">DAGS<span>TIDNINGEN</span></h1>
-               <nav class="main-nav" aria-label="Huvudmeny">
+               <nav class="main-nav" aria-label="Huvudmeny" data-i18n-aria-label="mainNav">
                   <ul>
                      <li><a href="#">NYHETER</a></li>
                      <li><a href="#">EKONOMI</a></li>
@@ -43,7 +43,7 @@
                </p>
 
                <div class="ad-container">
-                  <p class="ad-hint">ANNONS: VÄRLDSARVSTJÄNSTEN</p>
+                  <p class="ad-hint" data-i18n="adHint">ANNONS: VÄRLDSARVSTJÄNSTEN</p>
                   <button class="unesco-banner" id="openAdBtn" aria-haspopup="dialog">
                      <div class="unesco-content">
                         <div class="unesco-logo-wrapper">
@@ -51,8 +51,8 @@
                         </div>
                         <div class="unesco-text">
                            <span class="unesco-tag">WORLD HERITAGE SERVICE</span>
-                           <h3>Upptäck historien nära dig</h3>
-                           <p>Utforska världsarv i realtid med vår interaktiva karta.</p>
+                           <h3 data-i18n="bannerTitle">Upptäck historien nära dig</h3>
+                           <p data-i18n="bannerDesc">Utforska världsarv i realtid med vår interaktiva karta.</p>
                         </div>
                         <div class="unesco-arrow" aria-hidden="true">-&gt;</div>
                      </div>
@@ -81,25 +81,25 @@
 
       <div id="unescoModal" class="modal-overlay" role="dialog" aria-labelledby="regTitle" aria-modal="true">
          <div class="modal-window">
-            <button class="close-modal" id="closeAdBtn" aria-label="Stäng fönster">&times;</button>
+            <button class="close-modal" id="closeAdBtn" aria-label="Stäng fönster" data-i18n-aria-label="closeWindow">&times;</button>
             <div class="modal-header">
                <div class="fake-logo-small" aria-hidden="true">AV</div>
                <div>
-                  <h2 id="regTitle" style="margin: 0">Världsarvstjänsten</h2>
-                  <p style="margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9">Lokal information i realtid</p>
+                  <h2 id="regTitle" style="margin: 0" data-i18n="serviceTitle">Världsarvstjänsten</h2>
+                  <p style="margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9" data-i18n="serviceSubtitle">Lokal information i realtid</p>
                </div>
             </div>
 
             <div class="modal-body">
                <div class="info-card" id="siteSummary">
-                  <h3>Upptäck platsen</h3>
-                  <p>Hämtar världsarv nära dig...</p>
+                  <h3 data-i18n="discoverTitle">Upptäck platsen</h3>
+                  <p data-i18n="loadingNearby">Hämtar världsarv nära dig...</p>
                </div>
 
                <div class="map-placeholder">
-                  <div class="map-header">Interaktiv karta</div>
+                  <div class="map-header" data-i18n="interactiveMap">Interaktiv karta</div>
                   <div class="map-view" id="map-view">
-                     <p class="map-hint">Kartvy förbereds...</p>
+                     <p class="map-hint" data-i18n="mapPreparing">Kartvy förbereds...</p>
                   </div>
                </div>
 
@@ -107,9 +107,9 @@
 
                <div class="site-detail" id="siteDetail" hidden>
                   <div class="form-group">
-                     <label for="languageSelect">Språk</label>
+                     <label for="languageSelect" data-i18n="language">Språk</label>
                      <select id="languageSelect">
-                        <option value="">Original (engelska)</option>
+                        <option value="" data-i18n="originalEnglish">Original (engelska)</option>
                      </select>
                   </div>
                   <h4 id="detailTitle"></h4>
@@ -117,71 +117,71 @@
                </div>
 
                <div class="subscription-box">
-                  <h4>Bli Premium-prenumerant</h4>
+                  <h4 data-i18n="becomePremium">Bli Premium-prenumerant</h4>
                   <form class="subscription-form" id="subscribeForm">
                      <div class="form-group">
-                        <label for="phoneInput">Mobilnummer</label>
-                        <input type="tel" id="phoneInput" placeholder="+46700000000" />
+                        <label for="phoneInput" data-i18n="phoneLabel">Mobilnummer</label>
+                        <input type="tel" id="phoneInput" placeholder="+46700000000" data-i18n-placeholder="phonePlaceholder" />
                      </div>
                      <div class="form-group">
-                        <label for="nameInput">Namn</label>
-                        <input type="text" id="nameInput" placeholder="För- och efternamn" required />
+                        <label for="nameInput" data-i18n="nameLabel">Namn</label>
+                        <input type="text" id="nameInput" placeholder="För- och efternamn" data-i18n-placeholder="namePlaceholder" required />
                      </div>
                      <div class="form-group">
-                        <label for="emailInput">E-post</label>
-                        <input type="email" id="emailInput" placeholder="namn@exempel.se" />
+                        <label for="emailInput" data-i18n="emailLabel">E-post</label>
+                        <input type="email" id="emailInput" placeholder="namn@exempel.se" data-i18n-placeholder="emailPlaceholder" />
                      </div>
                      <div class="form-group">
-                        <label for="passwordInput">Lösenord</label>
-                        <input type="password" id="passwordInput" placeholder="Minst 8 tecken" minlength="8" />
+                        <label for="passwordInput" data-i18n="passwordLabel">Lösenord</label>
+                        <input type="password" id="passwordInput" placeholder="Minst 8 tecken" data-i18n-placeholder="passwordPlaceholder" minlength="8" />
                      </div>
                      <div class="form-group">
-                        <label for="paymentMethod">Betalning</label>
+                        <label for="paymentMethod" data-i18n="paymentLabel">Betalning</label>
                         <select id="paymentMethod">
-                           <option value="invoice">Faktura demo</option>
-                           <option value="card">Kort</option>
+                           <option value="invoice" data-i18n="invoiceOption">Faktura demo</option>
+                           <option value="card" data-i18n="cardOption">Kort</option>
                         </select>
                      </div>
 
-                     <button class="btn-bankid" id="bankidBtn" type="button">
+                     <button class="btn-bankid" id="bankidBtn" type="button" data-i18n="confirmBankId">
                         <img src="/static/img/bankid-logo.svg" alt="" aria-hidden="true" onerror="this.style.display='none'" />
                         Bekräfta med BankID
                      </button>
                      <div id="bankidChoicePanel" style="display:none;flex-direction:column;gap:8px;margin-top:8px;">
-                        <button class="btn-bankid" id="bankidDeviceBtn" type="button">BankID på den här enheten</button>
-                        <button class="btn-bankid" id="bankidMobileBtn" type="button">Mobilt BankID (QR-kod)</button>
+                        <button class="btn-bankid" id="bankidDeviceBtn" type="button" data-i18n="bankIdDevice">BankID på den här enheten</button>
+                        <button class="btn-bankid" id="bankidMobileBtn" type="button" data-i18n="bankIdMobile">Mobilt BankID (QR-kod)</button>
                      </div>
                      <div id="bankidQrPanel" hidden style="text-align:center;margin-top:12px;">
-                        <p style="font-size:0.85rem;margin-bottom:8px;">Öppna BankID-appen och skanna QR-koden</p>
+                        <p style="font-size:0.85rem;margin-bottom:8px;" data-i18n="bankIdQrInstruction">Öppna BankID-appen och skanna QR-koden</p>
                         <div id="bankidQrCode" style="display:inline-block;"></div>
                         <br/>
-                        <button class="btn-cancel" id="bankidQrCancelBtn" type="button" style="width:auto;padding:8px 20px;margin-top:8px;">← Tillbaka</button>
+                        <button class="btn-cancel" id="bankidQrCancelBtn" type="button" style="width:auto;padding:8px 20px;margin-top:8px;" data-i18n="back">← Tillbaka</button>
                      </div>
-                     <button class="btn-primary" type="submit">Aktivera prenumeration</button>
+                     <button class="btn-primary" type="submit" data-i18n="activateSubscription">Aktivera prenumeration</button>
                   </form>
                   <div class="form-status" id="widgetStatus" aria-live="polite"></div>
                   <div class="footer-link">
-                     Redan medlem? <a href="#" id="toMemberView">Mina Sidor / Logga in</a>
+                     <span data-i18n="alreadyMember">Redan medlem?</span> <a href="#" id="toMemberView" data-i18n="myPagesLogin">Mina Sidor / Logga in</a>
                   </div>
                </div>
 
                <div id="setPasswordSection" hidden>
-                  <h4>Slutför ditt konto</h4>
-                  <p style="font-size:0.9rem;margin-bottom:1rem;">Ditt konto är skapat. Välj inloggningsuppgifter för att komma åt Mina Sidor.</p>
+                  <h4 data-i18n="completeAccount">Slutför ditt konto</h4>
+                  <p style="font-size:0.9rem;margin-bottom:1rem;" data-i18n="completeAccountDesc">Ditt konto är skapat. Välj inloggningsuppgifter för att komma åt Mina Sidor.</p>
                   <form id="setCredentialsForm">
                      <div class="form-group" id="setupEmailGroup">
-                        <label for="setupEmail">E-postadress (användarnamn)</label>
-                        <input type="email" id="setupEmail" placeholder="namn@exempel.se" />
+                        <label for="setupEmail" data-i18n="emailUsername">E-postadress (användarnamn)</label>
+                        <input type="email" id="setupEmail" placeholder="namn@exempel.se" data-i18n-placeholder="emailPlaceholder" />
                      </div>
                      <div class="form-group">
-                        <label for="newPassword">Välj lösenord</label>
-                        <input type="password" id="newPassword" placeholder="Minst 8 tecken" />
+                        <label for="newPassword" data-i18n="choosePassword">Välj lösenord</label>
+                        <input type="password" id="newPassword" placeholder="Minst 8 tecken" data-i18n-placeholder="passwordPlaceholder" />
                      </div>
                      <div class="form-group">
-                        <label for="confirmPassword">Bekräfta lösenord</label>
-                        <input type="password" id="confirmPassword" placeholder="Upprepa lösenordet" />
+                        <label for="confirmPassword" data-i18n="confirmPasswordLabel">Bekräfta lösenord</label>
+                        <input type="password" id="confirmPassword" placeholder="Upprepa lösenordet" data-i18n-placeholder="repeatPassword" />
                      </div>
-                     <button class="btn-primary" type="submit">Spara och fortsätt</button>
+                     <button class="btn-primary" type="submit" data-i18n="saveAndContinue">Spara och fortsätt</button>
                   </form>
                   <div class="form-status" id="setPasswordStatus" aria-live="polite"></div>
                </div>
@@ -194,44 +194,44 @@
             <div class="modal-header" style="background: var(--unesco-dark)">
                <div class="fake-logo-small" aria-hidden="true">AV</div>
                <div>
-                  <h2 id="invoiceTitle" style="margin: 0">Fakturauppgifter</h2>
-                  <p style="margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9">Fyll i dina faktureringsuppgifter</p>
+                  <h2 id="invoiceTitle" style="margin: 0" data-i18n="invoiceTitle">Fakturauppgifter</h2>
+                  <p style="margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9" data-i18n="invoiceSubtitle">Fyll i dina faktureringsuppgifter</p>
                </div>
             </div>
             <div class="modal-body">
                <form id="invoiceForm">
                   <div class="info-card" style="margin-bottom: 1rem;">
-                     <p style="margin: 0; font-size: 0.9rem; color: #555;">
+                     <p style="margin: 0; font-size: 0.9rem; color: #555;" data-i18n="invoiceInfo">
                         En faktura kommer att skickas till din e-postadress. Betalning sker inom 30 dagar.
                      </p>
                   </div>
                   <div class="form-group">
-                     <label for="invoiceFullName">Fullständigt namn *</label>
-                     <input type="text" id="invoiceFullName" placeholder="För- och efternamn" required />
+                     <label for="invoiceFullName" data-i18n="invoiceFullName">Fullständigt namn *</label>
+                     <input type="text" id="invoiceFullName" placeholder="För- och efternamn" data-i18n-placeholder="invoiceFullNamePlaceholder" required />
                   </div>
                   <div class="form-group">
-                     <label for="invoiceAddress">Gatuadress *</label>
-                     <input type="text" id="invoiceAddress" placeholder="Gatunamn och nummer" required />
+                     <label for="invoiceAddress" data-i18n="invoiceAddress">Gatuadress *</label>
+                     <input type="text" id="invoiceAddress" placeholder="Gatunamn och nummer" data-i18n-placeholder="invoiceAddressPlaceholder" required />
                   </div>
                   <div style="display: flex; gap: 0.75rem;">
                      <div class="form-group" style="flex: 0 0 35%;">
-                        <label for="invoiceZip">Postnummer *</label>
-                        <input type="text" id="invoiceZip" placeholder="123 45" required />
+                        <label for="invoiceZip" data-i18n="invoiceZip">Postnummer *</label>
+                        <input type="text" id="invoiceZip" placeholder="123 45" data-i18n-placeholder="invoiceZipPlaceholder" required />
                      </div>
                      <div class="form-group" style="flex: 1;">
-                        <label for="invoiceCity">Ort *</label>
-                        <input type="text" id="invoiceCity" placeholder="Stad" required />
+                        <label for="invoiceCity" data-i18n="invoiceCity">Ort *</label>
+                        <input type="text" id="invoiceCity" placeholder="Stad" data-i18n-placeholder="invoiceCityPlaceholder" required />
                      </div>
                   </div>
                   <div class="form-group">
-                     <label for="invoiceEmail">E-post för faktura *</label>
-                     <input type="email" id="invoiceEmail" placeholder="namn@exempel.se" required />
+                     <label for="invoiceEmail" data-i18n="invoiceEmailLabel">E-post för faktura *</label>
+                     <input type="email" id="invoiceEmail" placeholder="namn@exempel.se" data-i18n-placeholder="emailPlaceholder" required />
                   </div>
                   <div class="form-group">
-                     <label for="invoiceRef">Referens / märkning <span style="font-weight:400;color:#888;">(valfritt)</span></label>
-                     <input type="text" id="invoiceRef" placeholder="T.ex. kostnadsställe eller namn" />
+                     <label for="invoiceRef"><span data-i18n="invoiceRef">Referens / märkning</span> <span style="font-weight:400;color:#888;" data-i18n="invoiceRefOptional">(valfritt)</span></label>
+                     <input type="text" id="invoiceRef" placeholder="T.ex. kostnadsställe eller namn" data-i18n-placeholder="invoiceRefPlaceholder" />
                   </div>
-                  <button class="btn-primary" type="submit" id="invoiceSubmitBtn">Bekräfta och aktivera prenumeration</button>
+                  <button class="btn-primary" type="submit" id="invoiceSubmitBtn" data-i18n="confirmActivate">Bekräfta och aktivera prenumeration</button>
                </form>
                <div class="form-status" id="invoiceStatus" aria-live="polite"></div>
             </div>
@@ -240,13 +240,13 @@
 
       <div id="memberModal" class="modal-overlay" role="dialog" aria-labelledby="memberTitle" aria-modal="true">
          <div class="modal-window">
-            <button class="close-modal" id="closeMemberBtn" aria-label="Stäng fönster">&times;</button>
+            <button class="close-modal" id="closeMemberBtn" aria-label="Stäng fönster" data-i18n-aria-label="closeWindow">&times;</button>
             <div class="modal-header" style="background: var(--unesco-dark)">
                <button id="backToVisitorBtn" aria-label="Tillbaka" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;margin-right:0.75rem;padding:0;">&#8592;</button>
                <div class="fake-logo-small" aria-hidden="true">AV</div>
                <div>
-                  <h2 id="memberTitle" style="margin: 0">Mina Sidor</h2>
-                  <p style="margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9">Premium-medlem</p>
+                  <h2 id="memberTitle" style="margin: 0" data-i18n="myPages">Mina Sidor</h2>
+                  <p style="margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9" data-i18n="premiumMember">Premium-medlem</p>
                </div>
             </div>
 
@@ -258,113 +258,113 @@
                         <small id="userEmailDisplay" style="opacity:0.7;font-size:0.8rem;"></small>
                      </div>
                      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-                        <button class="btn-cancel" id="logoutBtn" type="button" style="width:auto;margin:0;padding:8px 16px;">Logga ut</button>
-                        <button class="btn-cancel" id="deleteAccountBtn" type="button" style="width:auto;margin:0;padding:6px 12px;font-size:0.8rem;color:#dc3545;border-color:#dc3545;">Avsluta prenumeration och radera konto</button>
+                        <button class="btn-cancel" id="logoutBtn" type="button" style="width:auto;margin:0;padding:8px 16px;" data-i18n="logout">Logga ut</button>
+                        <button class="btn-cancel" id="deleteAccountBtn" type="button" style="width:auto;margin:0;padding:6px 12px;font-size:0.8rem;color:#dc3545;border-color:#dc3545;" data-i18n="deleteAccount">Avsluta prenumeration och radera konto</button>
                      </div>
                   </div>
                   <div id="deleteAccountConfirm" hidden style="margin-top:8px;padding:14px;background:#fff3f3;border:1px solid #f5c6cb;border-radius:8px;">
-                     <p style="margin:0 0 10px;font-size:0.9rem;">Är du säker? Din prenumeration avslutas och kontot raderas permanent.</p>
+                     <p style="margin:0 0 10px;font-size:0.9rem;" data-i18n="deleteConfirm">Är du säker? Din prenumeration avslutas och kontot raderas permanent.</p>
                      <div style="display:flex;gap:10px;">
-                        <button class="btn-primary" id="confirmDeleteYes" type="button" style="background:#dc3545;">Ja, radera</button>
-                        <button class="btn-primary" id="confirmDeleteNo" type="button" style="background:#6c757d;">Avbryt</button>
+                        <button class="btn-primary" id="confirmDeleteYes" type="button" style="background:#dc3545;" data-i18n="deleteYes">Ja, radera</button>
+                        <button class="btn-primary" id="confirmDeleteNo" type="button" style="background:#6c757d;" data-i18n="cancelBtn">Avbryt</button>
                      </div>
                   </div>
                </div>
 
 
                <form class="login-form" id="loginForm">
-                  <h4>Logga in</h4>
+                  <h4 data-i18n="loginTitle">Logga in</h4>
                   <div class="form-group">
-                     <label for="loginEmail">E-post</label>
-                     <input type="email" id="loginEmail" placeholder="namn@exempel.se" required />
+                     <label for="loginEmail" data-i18n="emailLabel">E-post</label>
+                     <input type="email" id="loginEmail" placeholder="namn@exempel.se" data-i18n-placeholder="emailPlaceholder" required />
                   </div>
                   <div class="form-group">
-                     <label for="loginPassword">Lösenord</label>
+                     <label for="loginPassword" data-i18n="passwordLabel">Lösenord</label>
                      <input type="password" id="loginPassword" required />
                   </div>
-                  <button class="btn-primary" type="submit">Logga in</button>
+                  <button class="btn-primary" type="submit" data-i18n="loginBtn">Logga in</button>
                </form>
 
                <div id="memberBankidSection">
-                  <p style="text-align:center;margin:8px 0;font-size:0.85rem;opacity:0.7;">— eller —</p>
-                  <button class="btn-bankid" id="memberBankidBtn" type="button">
+                  <p style="text-align:center;margin:8px 0;font-size:0.85rem;opacity:0.7;" data-i18n="or">— eller —</p>
+                  <button class="btn-bankid" id="memberBankidBtn" type="button" data-i18n="loginBankId">
                      <img src="/static/img/bankid-logo.svg" alt="" aria-hidden="true" onerror="this.style.display='none'" />
                      Logga in med BankID
                   </button>
                   <div id="memberBankidChoicePanel" style="display:none;flex-direction:column;gap:8px;margin-top:8px;">
-                     <button class="btn-bankid" id="memberBankidDeviceBtn" type="button">BankID på den här enheten</button>
-                     <button class="btn-bankid" id="memberBankidMobileBtn" type="button">Mobilt BankID (QR-kod)</button>
+                     <button class="btn-bankid" id="memberBankidDeviceBtn" type="button" data-i18n="bankIdDevice">BankID på den här enheten</button>
+                     <button class="btn-bankid" id="memberBankidMobileBtn" type="button" data-i18n="bankIdMobile">Mobilt BankID (QR-kod)</button>
                   </div>
                   <div id="memberBankidQrPanel" hidden style="text-align:center;margin-top:12px;">
-                     <p style="font-size:0.85rem;margin-bottom:8px;">Öppna BankID-appen och skanna QR-koden</p>
+                     <p style="font-size:0.85rem;margin-bottom:8px;" data-i18n="bankIdQrInstruction">Öppna BankID-appen och skanna QR-koden</p>
                      <div id="memberBankidQrCode" style="display:inline-block;"></div>
                      <br/>
-                     <button class="btn-cancel" id="memberBankidQrCancelBtn" type="button" style="width:auto;padding:8px 20px;margin-top:8px;">← Tillbaka</button>
+                     <button class="btn-cancel" id="memberBankidQrCancelBtn" type="button" style="width:auto;padding:8px 20px;margin-top:8px;" data-i18n="back">← Tillbaka</button>
                   </div>
                   <div class="form-status" id="memberBankidStatus" aria-live="polite"></div>
                </div>
 
                <form class="login-form" id="twoFactorForm" hidden>
-                  <h4>Tvåfaktorskod</h4>
+                  <h4 data-i18n="twoFactorTitle">Tvåfaktorskod</h4>
                   <div class="form-group">
-                     <label for="twoFactorCode">Kod</label>
+                     <label for="twoFactorCode" data-i18n="codeLabel">Kod</label>
                      <input type="text" id="twoFactorCode" inputmode="numeric" required />
                   </div>
-                  <button class="btn-primary" type="submit">Verifiera</button>
+                  <button class="btn-primary" type="submit" data-i18n="verifyBtn">Verifiera</button>
                </form>
                <div class="form-status" id="loginStatus" aria-live="polite"></div>
 
                <div id="twoFaPanel" hidden>
                   <div class="info-card">
-                     <h4 style="margin-top:0;">Tvåfaktorsautentisering</h4>
+                     <h4 style="margin-top:0;" data-i18n="twoFaTitle">Tvåfaktorsautentisering</h4>
                      <p id="twoFaStatusText">Laddar...</p>
-                     <button class="btn-primary" id="twoFaActionBtn" type="button" style="margin-top:4px;">Aktivera 2FA</button>
+                     <button class="btn-primary" id="twoFaActionBtn" type="button" style="margin-top:4px;" data-i18n="enable2fa">Aktivera 2FA</button>
                      <div id="twoFaSetupBox" hidden style="margin-top:12px;">
-                        <p style="font-size:0.85rem;margin-bottom:8px;">Skanna med Google Authenticator eller liknande app:</p>
+                        <p style="font-size:0.85rem;margin-bottom:8px;" data-i18n="scan2faInstructions">Skanna med Google Authenticator eller liknande app:</p>
                         <div id="twoFaQrCode" style="text-align:center;margin:8px 0;"></div>
                         <div class="form-group">
-                           <label for="twoFaCodeInput">Bekräfta med kod från appen</label>
+                           <label for="twoFaCodeInput" data-i18n="confirm2faCode">Bekräfta med kod från appen</label>
                            <input type="text" id="twoFaCodeInput" inputmode="numeric" placeholder="123456" maxlength="6" />
                         </div>
-                        <button class="btn-primary" id="twoFaVerifyBtn" type="button">Aktivera</button>
+                        <button class="btn-primary" id="twoFaVerifyBtn" type="button" data-i18n="activateBtn">Aktivera</button>
                      </div>
                      <div id="twoFaDisableBox" hidden style="margin-top:12px;">
                         <div class="form-group">
-                           <label for="twoFaDisableCodeInput">Kod från appen för att inaktivera</label>
+                           <label for="twoFaDisableCodeInput" data-i18n="disable2faCode">Kod från appen för att inaktivera</label>
                            <input type="text" id="twoFaDisableCodeInput" inputmode="numeric" placeholder="123456" maxlength="6" />
                         </div>
-                        <button class="btn-cancel" id="twoFaDisableVerifyBtn" type="button" style="margin-top:0;">Bekräfta inaktivering</button>
+                        <button class="btn-cancel" id="twoFaDisableVerifyBtn" type="button" style="margin-top:0;" data-i18n="confirmDeactivate">Bekräfta inaktivering</button>
                      </div>
                      <div class="form-status" id="twoFaStatus" aria-live="polite" style="margin-top:8px;font-size:0.85rem;"></div>
                   </div>
                </div>
 
                <div class="info-card" id="memberSiteCard" hidden>
-                  <h3>Världsarv i närheten</h3>
-                  <p id="memberSiteText">Hämtar närmaste världsarv...</p>
+                  <h3 data-i18n="sitesNearby">Världsarv i närheten</h3>
+                  <p id="memberSiteText" data-i18n="loadingSitesCard">Hämtar närmaste världsarv...</p>
                   <div class="checkbox-group">
                      <label class="custom-checkbox">
                         <input type="checkbox" id="visitedCheck" />
-                        <span>Jag har besökt denna plats</span>
+                        <span data-i18n="visited">Jag har besökt denna plats</span>
                      </label>
                   </div>
                </div>
 
                <div class="map-placeholder">
-                  <div class="map-header" id="memberMapHeader">Interaktiv karta</div>
+                  <div class="map-header" id="memberMapHeader" data-i18n="interactiveMap">Interaktiv karta</div>
                   <div class="map-view premium-map" id="member-map-view">
-                     <p class="map-hint">Fullständig karta laddas...</p>
+                     <p class="map-hint" data-i18n="mapLoading">Fullständig karta laddas...</p>
                   </div>
                </div>
 
                <div class="chatbot-container" id="chatbotContainer" hidden>
-                  <h4>AI-Guide (Premium)</h4>
-                  <div class="chat-box" id="chatOutput" aria-live="polite">
+                  <h4 data-i18n="aiGuideTitle">AI-Guide (Premium)</h4>
+                  <div class="chat-box" id="chatOutput" aria-live="polite" data-i18n="chatWelcome">
                      Välkommen! Ställ en fråga om världsarven nära dig.
                   </div>
                   <div class="chat-input-area">
-                     <input type="text" placeholder="Ställ en fråga..." id="chatInput" />
-                     <button id="sendChat">Fråga</button>
+                     <input type="text" placeholder="Ställ en fråga..." id="chatInput" data-i18n-placeholder="chatPlaceholder" />
+                     <button id="sendChat" data-i18n="askBtn">Fråga</button>
                   </div>
                </div>
 
