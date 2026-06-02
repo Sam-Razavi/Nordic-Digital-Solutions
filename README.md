@@ -89,13 +89,14 @@ The project was built as a five-person university assignment demonstrating a rea
 ---
 
 ### 6 — BankID Authentication — Method Selection
-![BankID method selection](docs/screenshots/06-bankid-choice.png)
+<img width="776" height="271" alt="image" src="https://github.com/user-attachments/assets/6ebeb8f7-fe20-4fa8-9c83-e4a4df49a3e5" />
 > *When the user clicks "Bekräfta med BankID", a choice panel appears: "BankID på den här enheten" opens the BankID app directly on the same device; "Mobilt BankID (QR-kod)" displays an animated QR code for scanning with a mobile device.*
 
 ---
 
 ### 7 — BankID Mobile QR Code Flow
-<img width="776" height="271" alt="image" src="https://github.com/user-attachments/assets/6ebeb8f7-fe20-4fa8-9c83-e4a4df49a3e5" />
+<img width="1315" height="985" alt="image" src="https://github.com/user-attachments/assets/66354f74-8096-4660-903f-8479db7b097a" />
+
 
 > *The animated QR code panel for mobile BankID. The code refreshes every second (HMAC-SHA256 animation per the BankID specification). The user opens the BankID app on their phone and scans the code to authenticate. Status polling happens automatically every 2 seconds in the background.*
 
