@@ -13,6 +13,7 @@ from services.notification.config import (
     COOLDOWN_EMAIL_SECONDS,
     SEND_WELCOME_NOTIFICATIONS,
     SITE_PAGE_BASE_URL,
+    NOTIFICATION_PROXY_URL,
 )
 from services.notification import db
 from services.notification import messages
@@ -85,6 +86,20 @@ def send_notification(notification_type, to, message, **kwargs):
             "error": "cooldown",
             "message": "Notifiering redan skickad för denna plats och kanal nyligen.",
         }
+
+    if NOTIFICATION_PROXY_URL:
+        import requests
+        payload = {"channel": notification_type, "to": to, "message": message}
+        if kwargs.get("subject"):
+            payload["subject"] = kwargs["subject"]
+        try:
+            resp = requests.post(NOTIFICATION_PROXY_URL, json=payload, timeout=10)
+            result = resp.json()
+            result["_proxy_target"] = NOTIFICATION_PROXY_URL
+            result["_proxy_status"] = resp.status_code
+            return result
+        except Exception as e:
+            return {"success": False, "error": str(e), "_proxy_target": NOTIFICATION_PROXY_URL}
 
     if notification_type == "sms":
         result = sms_provider.send(to=to, message=message)
