@@ -29,6 +29,9 @@ SMTP2GO_SENDER = os.getenv("SMTP2GO_SENDER", "noreply@nordicdigitalsolutions.se"
 # Debug-token för skyddade endpoints (t.ex. /subscribers)
 ADMIN_TOKEN = os.getenv("NOTIFICATION_ADMIN_TOKEN", "")
 
+# Proxy: om satt, vidarebefordra alla notiser till denna URL istället för lokala providers
+NOTIFICATION_PROXY_URL = os.getenv("NOTIFICATION_PROXY_URL", "")
+
 # Bas-URL till sidan som visar världsarvsinformation.
 # Backend bygger länken som "{SITE_PAGE_BASE_URL}?id={site_id}".
 SITE_PAGE_BASE_URL = os.getenv(
