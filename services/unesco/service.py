@@ -24,11 +24,46 @@ def get_sites(limit=100, offset=0):
     params = {
         "limit": limit,
         "offset": offset,
-        "select": "name_en,short_description_en,category,states_names,region,coordinates,date_inscribed,main_image_url,id_no"
+        "select": "name_en,short_description_en,category,states_names,region,coordinates,geo_point_2d,date_inscribed,main_image_url,id_no"
     }
     response = requests.get(BASE_URL, params=params)
     response.raise_for_status()
-    return response.json().get("results", [])
+    sites = response.json().get("results", [])
+    for site in sites:
+        site["coordinates"] = _to_lat_lon(site)
+        site.pop("geo_point_2d", None)
+    return sites
+
+
+def _to_lat_lon(site):
+    """Returnerar sajtens position som {"lat": ..., "lon": ...}, eller None.
+
+    UNESCO-API:t ger "coordinates" som GeoJSON (en MultiPoint med [lon, lat]-par)
+    och mittpunkten som "geo_point_2d" ({"lat", "lon"}). Resten av appen
+    (karta, notiser) förväntar sig {"lat", "lon"}, så vi normaliserar här.
+    """
+    for value in (site.get("geo_point_2d"), site.get("coordinates")):
+        if isinstance(value, dict) and _is_number(value.get("lat")) and _is_number(value.get("lon")):
+            return {"lat": float(value["lat"]), "lon": float(value["lon"])}
+
+    # Reserv: första punkten i GeoJSON-geometrin ([lon, lat]).
+    coordinates = site.get("coordinates")
+    geometry = coordinates.get("geometry") if isinstance(coordinates, dict) else None
+    if not isinstance(geometry, dict):
+        return None
+    points = geometry.get("coordinates")
+    if geometry.get("type") == "Point":
+        points = [points]
+    if not points or not isinstance(points, list):
+        return None
+    first = points[0]
+    if isinstance(first, (list, tuple)) and len(first) >= 2 and _is_number(first[0]) and _is_number(first[1]):
+        return {"lat": float(first[1]), "lon": float(first[0])}
+    return None
+
+
+def _is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
 def _haversine_km(lat1, lon1, lat2, lon2):
@@ -67,7 +102,7 @@ def get_sites_near(lat=BORLANGE_LAT, lon=BORLANGE_LON, radius_km=DEFAULT_RADIUS_
     nearby = []
     for site in all_sites:
         coords = site.get("coordinates")
-        if not coords:
+        if not isinstance(coords, dict) or not _is_number(coords.get("lat")) or not _is_number(coords.get("lon")):
             continue
         dist = _haversine_km(lat, lon, coords["lat"], coords["lon"])
         if dist <= radius_km:
